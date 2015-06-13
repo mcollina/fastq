@@ -1,0 +1,29 @@
+{
+  "name": "fastqueue",
+  "version": "0.0.1",
+  "description": "Fast, in memory work queue",
+  "main": "queue.js",
+  "scripts": {
+    "test": "tape test.js | faucet"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcollina/fastqueue.git"
+  },
+  "keywords": [
+    "fast",
+    "queue",
+    "async",
+    "worker"
+  ],
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mcollina/fastqueue/issues"
+  },
+  "homepage": "https://github.com/mcollina/fastqueue#readme",
+  "devDependencies": {
+    "faucet": "0.0.1",
+    "tape": "^4.0.0"
+  }
+}
