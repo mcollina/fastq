@@ -37,3 +37,27 @@ test('limit', function (t) {
     setTimeout(cb, arg, null, arg)
   }
 })
+
+test.only('multiple executions', function (t) {
+  t.plan(15)
+
+  var queue = buildQueue(worker, 1)
+  var toExec = [1, 2, 3, 4, 5]
+  var count = 0
+
+  toExec.forEach(function (task) {
+    queue.push(task, done)
+  })
+
+  function done (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, toExec[count - 1], 'the result matches')
+  }
+
+  function worker (arg, cb) {
+    console.log('received', arg)
+    t.equal(arg, toExec[count], 'arg matches')
+    count++
+    setImmediate(cb, null, arg)
+  }
+})

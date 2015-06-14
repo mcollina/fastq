@@ -4,8 +4,13 @@
   "description": "Fast, in memory work queue",
   "main": "queue.js",
   "scripts": {
-    "test": "tape test.js | faucet"
+    "lint": "standard",
+    "test": "tape test.js | tap-spec"
   },
+  "pre-commit": [
+    "lint",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mcollina/fastqueue.git"
@@ -23,7 +28,9 @@
   },
   "homepage": "https://github.com/mcollina/fastqueue#readme",
   "devDependencies": {
-    "faucet": "0.0.1",
+    "pre-commit": "^1.0.10",
+    "standard": "^4.2.1",
+    "tap-spec": "^4.0.0",
     "tape": "^4.0.0"
   }
 }

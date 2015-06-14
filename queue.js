@@ -1,9 +1,10 @@
 'use strict'
 
 function fastqueue (worker, limit) {
-  var head = new Task(release)
-  var tail = head
-  var queue = null
+  var cacheHead = new Task(release)
+  var cacheTail = cacheHead
+  var queueHead = null
+  var queueTail = null
   var self = {
     push: push
   }
@@ -17,10 +18,12 @@ function fastqueue (worker, limit) {
     current.callback = done
 
     if (limit === 0) {
-      if (queue) {
-        queue.next = current
+      if (queueTail) {
+        queueTail.next = current
+        queueTail = current
       } else {
-        queue = current
+        queueHead = current
+        queueTail = current
       }
     } else {
       limit--
@@ -29,13 +32,13 @@ function fastqueue (worker, limit) {
   }
 
   function next () {
-    var task = head
+    var task = cacheHead
 
     if (task.next) {
-      head = task.next
+      cacheHead = task.next
     } else {
-      head = new Task(release)
-      tail = head
+      cacheHead = new Task(release)
+      cacheTail = cacheHead
     }
 
     task.next = null
@@ -44,15 +47,16 @@ function fastqueue (worker, limit) {
   }
 
   function release (holder) {
-    tail.next = holder
-    tail = holder
+    cacheTail.next = holder
+    cacheTail = holder
     //released()
-    var next = queue
+    var next = queueHead
     if (next) {
-      queue = next.next
+      queueHead = next.next
       next.next = null
       worker(next.value, next.worked)
     } else {
+      queueTail = null
       limit++
     }
   }
@@ -71,8 +75,8 @@ function Task (release) {
     var callback = self.callback
     self.value = null
     self.callback = noop
-    release(self)
     callback(err, result)
+    release(self)
   }
 }
 
