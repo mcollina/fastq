@@ -1,4 +1,4 @@
-# fastq
+# fastq&nbsp;&nbsp;[![build status](https://secure.travis-ci.org/mcollina/fastq.png)](http://travis-ci.org/mcollina/fastq)
 
 Fast, in memory work queue.
 
