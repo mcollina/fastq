@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/mcollina/fastqueue#readme",
   "devDependencies": {
+    "async": "^1.2.1",
     "pre-commit": "^1.0.10",
     "standard": "^4.2.1",
     "tap-spec": "^4.0.0",

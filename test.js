@@ -38,7 +38,7 @@ test('limit', function (t) {
   }
 })
 
-test.only('multiple executions', function (t) {
+test('multiple executions', function (t) {
   t.plan(15)
 
   var queue = buildQueue(worker, 1)
@@ -52,6 +52,31 @@ test.only('multiple executions', function (t) {
   function done (err, result) {
     t.error(err, 'no error')
     t.equal(result, toExec[count - 1], 'the result matches')
+  }
+
+  function worker (arg, cb) {
+    console.log('received', arg)
+    t.equal(arg, toExec[count], 'arg matches')
+    count++
+    setImmediate(cb, null, arg)
+  }
+})
+
+test('multiple executions, one after another', function (t) {
+  t.plan(15)
+
+  var queue = buildQueue(worker, 1)
+  var toExec = [1, 2, 3, 4, 5]
+  var count = 0
+
+  queue.push(toExec[0], done)
+
+  function done (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, toExec[count - 1], 'the result matches')
+    if (count < toExec.length) {
+      queue.push(toExec[count], done)
+    }
   }
 
   function worker (arg, cb) {

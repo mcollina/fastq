@@ -49,14 +49,15 @@ function fastqueue (worker, limit) {
   function release (holder) {
     cacheTail.next = holder
     cacheTail = holder
-    //released()
     var next = queueHead
     if (next) {
+      if (queueTail === queueHead) {
+        queueTail = null
+      }
       queueHead = next.next
       next.next = null
       worker(next.value, next.worked)
     } else {
-      queueTail = null
       limit++
     }
   }
