@@ -1,4 +1,4 @@
-# fastqueue
+# fastq
 
 Fast, in memory work queue.
 
@@ -12,14 +12,14 @@ Obtained on node 0.12.3, on a HP Spectre 360 (the Build 2015 edition).
 
 ## Install
 
-`npm i fastqueue --save`
+`npm i fastq --save`
 
 ## Usage
 
 ```js
 'use strict'
 
-var queue = require('./')(worker, 1)
+var queue = require('fastq')(worker, 1)
 
 queue.push(42, function (err, result) {
   if (err) { throw err }
