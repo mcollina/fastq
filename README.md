@@ -5,10 +5,17 @@ Fast, in memory work queue.
 Benchmarks (1 million tasks):
 
 * setImmedidate: 1715ms
-* fastqueue: 1824ms
+* fastq: 1824ms
 * async.queue: 6158ms
 
 Obtained on node 0.12.3, on a HP Spectre 360 (the Build 2015 edition).
+
+If you need zero-overhead series function call, check out
+[fastseries](http://npm.im/fastseries). For zero-overhead parallel
+function call, check out [fastparallel](http://npm.im/fastparallel).
+
+[![js-standard-style](https://raw.githubusercontent.com/feross/standard/master/badge.png)](https://github.com/feross/standard)
+
 
 ## Install
 
