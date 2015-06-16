@@ -86,3 +86,20 @@ test('multiple executions, one after another', function (t) {
     setImmediate(cb, null, arg)
   }
 })
+
+test('set this', function (t) {
+  t.plan(3)
+
+  var that = {}
+  var queue = buildQueue(that, worker, 1)
+
+  queue.push(42, function (err, result) {
+    t.error(err, 'no error')
+    t.equal(this, that, 'this matches')
+  })
+
+  function worker (arg, cb) {
+    t.equal(this, that, 'this matches')
+    cb(null, true)
+  }
+})

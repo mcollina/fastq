@@ -1,7 +1,14 @@
 'use strict'
 
-function fastqueue (worker, limit) {
-  var cacheHead = new Task(release)
+function fastqueue (context, worker, limit) {
+
+  if (typeof context === 'function') {
+    limit = worker
+    worker = context
+    context = null
+  }
+
+  var cacheHead = new Task(context, release)
   var cacheTail = cacheHead
   var queueHead = null
   var queueTail = null
@@ -27,7 +34,7 @@ function fastqueue (worker, limit) {
       }
     } else {
       limit--
-      worker(current.value, current.worked)
+      worker.call(context, current.value, current.worked)
     }
   }
 
@@ -37,7 +44,7 @@ function fastqueue (worker, limit) {
     if (task.next) {
       cacheHead = task.next
     } else {
-      cacheHead = new Task(release)
+      cacheHead = new Task(context, release)
       cacheTail = cacheHead
     }
 
@@ -56,7 +63,7 @@ function fastqueue (worker, limit) {
       }
       queueHead = next.next
       next.next = null
-      worker(next.value, next.worked)
+      worker.call(context, next.value, next.worked)
     } else {
       limit++
     }
@@ -65,7 +72,7 @@ function fastqueue (worker, limit) {
 
 function noop () {}
 
-function Task (release) {
+function Task (context, release) {
   this.value = null
   this.callback = noop
   this.next = null
@@ -76,7 +83,7 @@ function Task (release) {
     var callback = self.callback
     self.value = null
     self.callback = noop
-    callback(err, result)
+    callback.call(context, err, result)
     release(self)
   }
 }
