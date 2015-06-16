@@ -38,6 +38,26 @@ function worker (arg, cb) {
 }
 ```
 
+### Setting this
+
+```js
+'use strict'
+
+var that = { hello: 'world' }
+var queue = require('fastq')(that, worker, 1)
+
+queue.push(42, function (err, result) {
+  if (err) { throw err }
+  console.log(this)
+  console.log('the result is', result)
+})
+
+function worker (arg, cb) {
+  console.log(this)
+  cb(null, 42 * 2)
+}
+```
+
 ## License
 
 ISC
