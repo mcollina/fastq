@@ -1,7 +1,6 @@
 'use strict'
 
 function fastqueue (context, worker, limit) {
-
   if (typeof context === 'function') {
     limit = worker
     worker = context
