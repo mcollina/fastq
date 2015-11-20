@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mcollina/fastqueue.git"
+    "url": "git+https://github.com/mcollina/fastq.git"
   },
   "keywords": [
     "fast",
@@ -24,9 +24,9 @@
   "author": "Matteo Collina <hello@matteocollina.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mcollina/fastqueue/issues"
+    "url": "https://github.com/mcollina/fastq/issues"
   },
-  "homepage": "https://github.com/mcollina/fastqueue#readme",
+  "homepage": "https://github.com/mcollina/fastq#readme",
   "devDependencies": {
     "async": "^1.2.1",
     "pre-commit": "^1.0.10",
