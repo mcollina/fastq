@@ -55,7 +55,6 @@ test('multiple executions', function (t) {
   }
 
   function worker (arg, cb) {
-    console.log('received', arg)
     t.equal(arg, toExec[count], 'arg matches')
     count++
     setImmediate(cb, null, arg)
@@ -101,5 +100,82 @@ test('set this', function (t) {
   function worker (arg, cb) {
     t.equal(this, that, 'this matches')
     cb(null, true)
+  }
+})
+
+test('drain', function (t) {
+  t.plan(4)
+
+  var queue = buildQueue(worker, 1)
+  var worked = false
+
+  queue.push(42, function (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+  })
+
+  queue.drain = function () {
+    t.equal(true, worked, 'drained')
+  }
+
+  function worker (arg, cb) {
+    t.equal(arg, 42)
+    worked = true
+    setImmediate(cb, null, true)
+  }
+})
+
+test('pause && resume', function (t) {
+  t.plan(4)
+
+  var queue = buildQueue(worker, 1)
+  var worked = false
+
+  queue.pause()
+
+  queue.push(42, function (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+  })
+
+  t.notOk(worked, 'it should be paused')
+
+  queue.resume()
+
+  function worker (arg, cb) {
+    t.equal(arg, 42)
+    worked = true
+    cb(null, true)
+  }
+})
+
+test('altering concurrency', function (t) {
+  t.plan(7)
+
+  var queue = buildQueue(worker, 1)
+  var count = 0
+
+  queue.pause()
+
+  queue.push(24, workDone)
+  queue.push(24, workDone)
+
+  queue.concurrency = 2
+
+  queue.resume()
+
+  t.equal(queue.running(), 2, '2 jobs running')
+
+  function workDone (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+  }
+
+  function worker (arg, cb) {
+    t.equal(0, count, 'works in parallel')
+    setImmediate(function () {
+      count++
+      cb(null, true)
+    })
   }
 })

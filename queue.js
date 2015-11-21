@@ -2,9 +2,9 @@
 
 var reusify = require('reusify')
 
-function fastqueue (context, worker, limit) {
+function fastqueue (context, worker, concurrency) {
   if (typeof context === 'function') {
-    limit = worker
+    concurrency = worker
     worker = context
     context = null
   }
@@ -12,11 +12,36 @@ function fastqueue (context, worker, limit) {
   var cache = reusify(Task)
   var queueHead = null
   var queueTail = null
+  var paused = false
+  var _running = 0
+
   var self = {
-    push: push
+    push: push,
+    drain: noop,
+    pause: pause,
+    concurrency: concurrency,
+    running: running,
+    resume: resume
   }
 
   return self
+
+  function running () {
+    return _running
+  }
+
+  function pause () {
+    paused = true
+  }
+
+  function resume () {
+    if (!paused) return
+    paused = false
+    for (var i = 0; i < self.concurrency; i++) {
+      _running++
+      release()
+    }
+  }
 
   function push (value, done) {
     var current = cache.get()
@@ -26,7 +51,7 @@ function fastqueue (context, worker, limit) {
     current.value = value
     current.callback = done
 
-    if (limit === 0) {
+    if (_running === self.concurrency || paused) {
       if (queueTail) {
         queueTail.next = current
         queueTail = current
@@ -35,23 +60,29 @@ function fastqueue (context, worker, limit) {
         queueTail = current
       }
     } else {
-      limit--
+      _running++
       worker.call(context, current.value, current.worked)
     }
   }
 
   function release (holder) {
-    cache.release(holder)
+    if (holder) {
+      cache.release(holder)
+    }
     var next = queueHead
     if (next) {
-      if (queueTail === queueHead) {
-        queueTail = null
+      if (!paused) {
+        if (queueTail === queueHead) {
+          queueTail = null
+        }
+        queueHead = next.next
+        next.next = null
+        worker.call(context, next.value, next.worked)
+      } else {
+        _running--
       }
-      queueHead = next.next
-      next.next = null
-      worker.call(context, next.value, next.worked)
-    } else {
-      limit++
+    } else if (--_running === 0) {
+      self.drain()
     }
   }
 }
