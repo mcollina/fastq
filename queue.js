@@ -12,7 +12,6 @@ function fastqueue (context, worker, concurrency) {
   var cache = reusify(Task)
   var queueHead = null
   var queueTail = null
-  var paused = false
   var _running = 0
 
   var self = {
@@ -20,6 +19,7 @@ function fastqueue (context, worker, concurrency) {
     drain: noop,
     saturated: noop,
     pause: pause,
+    paused: false,
     concurrency: concurrency,
     running: running,
     resume: resume,
@@ -33,12 +33,12 @@ function fastqueue (context, worker, concurrency) {
   }
 
   function pause () {
-    paused = true
+    self.paused = true
   }
 
   function resume () {
-    if (!paused) return
-    paused = false
+    if (!self.paused) return
+    self.paused = false
     for (var i = 0; i < self.concurrency; i++) {
       _running++
       release()
@@ -57,7 +57,7 @@ function fastqueue (context, worker, concurrency) {
     current.value = value
     current.callback = done
 
-    if (_running === self.concurrency || paused) {
+    if (_running === self.concurrency || self.paused) {
       if (queueTail) {
         queueTail.next = current
         queueTail = current
@@ -78,7 +78,7 @@ function fastqueue (context, worker, concurrency) {
     }
     var next = queueHead
     if (next) {
-      if (!paused) {
+      if (!self.paused) {
         if (queueTail === queueHead) {
           queueTail = null
         }

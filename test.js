@@ -126,10 +126,12 @@ test('drain', function (t) {
 })
 
 test('pause && resume', function (t) {
-  t.plan(4)
+  t.plan(7)
 
   var queue = buildQueue(worker, 1)
   var worked = false
+
+  t.notOk(queue.paused, 'it should not be paused')
 
   queue.pause()
 
@@ -139,8 +141,11 @@ test('pause && resume', function (t) {
   })
 
   t.notOk(worked, 'it should be paused')
+  t.ok(queue.paused, 'it should be paused')
 
   queue.resume()
+
+  t.notOk(queue.paused, 'it should not be paused')
 
   function worker (arg, cb) {
     t.equal(arg, 42)
