@@ -210,3 +210,34 @@ test('idle()', function (t) {
     setImmediate(cb, null, true)
   }
 })
+
+test('saturated', function (t) {
+  t.plan(9)
+
+  var queue = buildQueue(worker, 1)
+  var preworked = 0
+  var worked = 0
+
+  queue.saturated = function () {
+    t.pass('saturated')
+    t.equal(preworked, 1, 'started 1 task')
+    t.equal(worked, 0, 'worked zero task')
+  }
+
+  queue.push(42, done)
+  queue.push(42, done)
+
+  function done (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+  }
+
+  function worker (arg, cb) {
+    t.equal(arg, 42)
+    preworked++
+    setImmediate(function () {
+      worked++
+      cb(null, true)
+    })
+  }
+})

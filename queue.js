@@ -18,6 +18,7 @@ function fastqueue (context, worker, concurrency) {
   var self = {
     push: push,
     drain: noop,
+    saturated: noop,
     pause: pause,
     concurrency: concurrency,
     running: running,
@@ -63,6 +64,7 @@ function fastqueue (context, worker, concurrency) {
       } else {
         queueHead = current
         queueTail = current
+        self.saturated()
       }
     } else {
       _running++
