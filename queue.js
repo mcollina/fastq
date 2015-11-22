@@ -21,7 +21,8 @@ function fastqueue (context, worker, concurrency) {
     pause: pause,
     concurrency: concurrency,
     running: running,
-    resume: resume
+    resume: resume,
+    idle: idle
   }
 
   return self
@@ -41,6 +42,10 @@ function fastqueue (context, worker, concurrency) {
       _running++
       release()
     }
+  }
+
+  function idle () {
+    return _running === 0
   }
 
   function push (value, done) {

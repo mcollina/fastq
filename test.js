@@ -179,3 +179,34 @@ test('altering concurrency', function (t) {
     })
   }
 })
+
+test('idle()', function (t) {
+  t.plan(12)
+
+  var queue = buildQueue(worker, 1)
+
+  t.ok(queue.idle(), 'queue is idle')
+
+  queue.push(42, function (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+    t.notOk(queue.idle(), 'queue is not idle')
+  })
+
+  queue.push(42, function (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+    // it will go idle after executing this function
+    setImmediate(function () {
+      t.ok(queue.idle(), 'queue is now idle')
+    })
+  })
+
+  t.notOk(queue.idle(), 'queue is not idle')
+
+  function worker (arg, cb) {
+    t.notOk(queue.idle(), 'queue is not idle')
+    t.equal(arg, 42)
+    setImmediate(cb, null, true)
+  }
+})
