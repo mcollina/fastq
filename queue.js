@@ -24,7 +24,8 @@ function fastqueue (context, worker, concurrency) {
     running: running,
     resume: resume,
     idle: idle,
-    length: length
+    length: length,
+    unshift: unshift
   }
 
   return self
@@ -74,6 +75,29 @@ function fastqueue (context, worker, concurrency) {
       if (queueTail) {
         queueTail.next = current
         queueTail = current
+      } else {
+        queueHead = current
+        queueTail = current
+        self.saturated()
+      }
+    } else {
+      _running++
+      worker.call(context, current.value, current.worked)
+    }
+  }
+
+  function unshift (value, done) {
+    var current = cache.get()
+
+    current.context = context
+    current.release = release
+    current.value = value
+    current.callback = done
+
+    if (_running === self.concurrency || self.paused) {
+      if (queueHead) {
+        current.next = queueHead
+        queueHead = current
       } else {
         queueHead = current
         queueTail = current

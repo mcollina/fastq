@@ -270,3 +270,26 @@ test('length', function (t) {
     })
   }
 })
+
+test('unshift', function (t) {
+  t.plan(8)
+
+  var queue = buildQueue(worker, 1)
+  var expected = [1, 2, 3, 4]
+
+  queue.push(1, done)
+  queue.push(4, done)
+  queue.unshift(3, done)
+  queue.unshift(2, done)
+
+  function done (err, result) {
+    t.error(err, 'no error')
+  }
+
+  function worker (arg, cb) {
+    t.equal(expected.shift(), arg, 'tasks come in order')
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})
