@@ -246,3 +246,27 @@ test('saturated', function (t) {
     })
   }
 })
+
+test('length', function (t) {
+  t.plan(7)
+
+  var queue = buildQueue(worker, 1)
+
+  t.equal(queue.length(), 0, 'nothing waiting')
+  queue.push(42, done)
+  t.equal(queue.length(), 0, 'nothing waiting')
+  queue.push(42, done)
+  t.equal(queue.length(), 1, 'one task waiting')
+  queue.push(42, done)
+  t.equal(queue.length(), 2, 'two tasks waiting')
+
+  function done (err, result) {
+    t.error(err, 'no error')
+  }
+
+  function worker (arg, cb) {
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})

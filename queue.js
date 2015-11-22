@@ -23,7 +23,8 @@ function fastqueue (context, worker, concurrency) {
     concurrency: concurrency,
     running: running,
     resume: resume,
-    idle: idle
+    idle: idle,
+    length: length
   }
 
   return self
@@ -34,6 +35,18 @@ function fastqueue (context, worker, concurrency) {
 
   function pause () {
     self.paused = true
+  }
+
+  function length () {
+    var current = queueHead
+    var counter = 0
+
+    while (current) {
+      current = current.next
+      counter++
+    }
+
+    return counter
   }
 
   function resume () {
