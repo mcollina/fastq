@@ -4,11 +4,11 @@ Fast, in memory work queue.
 
 Benchmarks (1 million tasks):
 
-* setImmedidate: 1715ms
-* fastq: 1824ms
-* async.queue: 6158ms
+* setImmedidate: 1313ms
+* fastq: 1462ms
+* async.queue: 3989ms
 
-Obtained on node 0.12.3, on a HP Spectre 360 (the Build 2015 edition).
+Obtained on node 4.2.2, on a MacBook Pro 2014 (i7, 16GB of RAM).
 
 If you need zero-overhead series function call, check out
 [fastseries](http://npm.im/fastseries). For zero-overhead parallel
@@ -16,6 +16,10 @@ function call, check out [fastparallel](http://npm.im/fastparallel).
 
 [![js-standard-style](https://raw.githubusercontent.com/feross/standard/master/badge.png)](https://github.com/feross/standard)
 
+  * <a href="#install">Installation</a>
+  * <a href="#basic">Basic Example</a>
+  * <a href="#api">API</a>
+  * <a href="#licence">Licence &amp; copyright</a>
 
 ## Install
 
@@ -57,6 +61,113 @@ function worker (arg, cb) {
   cb(null, 42 * 2)
 }
 ```
+
+## API
+
+* <a href="#fastqueue"><code>fastqueue()</code></a>
+* <a href="#push"><code>queue#<b>push()</b></code></a>
+* <a href="#unshift"><code>queue#<b>unshift()</b></code></a>
+* <a href="#pause"><code>queue#<b>pause()</b></code></a>
+* <a href="#resume"><code>queue#<b>resume()</b></code></a>
+* <a href="#idle"><code>queue#<b>idle()</b></code></a>
+* <a href="#length"><code>queue#<b>length()</b></code></a>
+* <a href="#kill"><code>queue#<b>kill()</b></code></a>
+* <a href="#concurrency"><code>queue#<b>concurrency</b></code></a>
+* <a href="#drain"><code>queue#<b>drain</b></code></a>
+* <a href="#empty"><code>queue#<b>empty</b></code></a>
+* <a href="#saturated"><code>queue#<b>saturated</b></code></a>
+
+-------------------------------------------------------
+<a name="fastqueue"></a>
+### fastqueue([that], worker, concurrency)
+
+Creates a new queue.
+
+Arguments:
+
+* `that`, optional context of the `worker` function.
+* `worker`, worker function, it would be called with `that` as `this`,
+  if that is specified.
+* `concurrency`, number of concurrent tasks that could be executed in
+  parallel.
+
+-------------------------------------------------------
+<a name="push"></a>
+### queue.push(task, done)
+
+Add a task at the end of the queue. `done(err, result)` will be called
+when the task was processed.
+
+-------------------------------------------------------
+<a name="unshift"></a>
+### queue.unshift(task, done)
+
+Add a task at the beginning of the queue. `done(err, result)` will be called
+when the task was processed.
+
+-------------------------------------------------------
+<a name="pause"></a>
+### queue.pause()
+
+Pause the processing of tasks. Currently worked tasks are not
+stopped.
+
+-------------------------------------------------------
+<a name="resume"></a>
+### queue.resume()
+
+Resume the processing of tasks.
+
+-------------------------------------------------------
+<a name="idle"></a>
+### queue.idle()
+
+Returns `true` if there are tasks being processed or waiting to be processed.
+`false` otherwise.
+
+-------------------------------------------------------
+<a name="length"></a>
+### queue.length()
+
+Returns the number of tasks waiting to be processed (in the queue).
+
+-------------------------------------------------------
+<a name="kill"></a>
+### queue.kill()
+
+Removes all tasks waiting to be processed, and reset `drain` to an empty
+function.
+
+-------------------------------------------------------
+<a name="concurrency"></a>
+### queue.concurrency
+
+Property that returns the number of concurrent tasks that could be executed in
+parallel. It can be altered at runtime.
+
+-------------------------------------------------------
+<a name="drain"></a>
+### queue.drain
+
+Function that will be called when the last
+item from the queue has been processed by a worker.
+It can be altered at runtime.
+
+-------------------------------------------------------
+<a name="empty"></a>
+### queue.empty
+
+Function that will be called when the last
+item from the queue has been assigned to a worker.
+It can be altered at runtime.
+
+-------------------------------------------------------
+<a name="saturated"></a>
+### queue.saturated
+
+Function that will be called when the queue hits the concurrency
+limit.
+It can be altered at runtime.
 
 ## License
 
