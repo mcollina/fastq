@@ -293,3 +293,94 @@ test('unshift', function (t) {
     })
   }
 })
+
+test('unshift && empty', function (t) {
+  t.plan(2)
+
+  var queue = buildQueue(worker, 1)
+  var completed = false
+
+  queue.pause()
+
+  queue.empty = function () {
+    t.notOk(completed, 'the task has not completed yet')
+  }
+
+  queue.unshift(1, done)
+
+  queue.resume()
+
+  function done (err, result) {
+    completed = true
+    t.error(err, 'no error')
+  }
+
+  function worker (arg, cb) {
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})
+
+test('push && empty', function (t) {
+  t.plan(2)
+
+  var queue = buildQueue(worker, 1)
+  var completed = false
+
+  queue.pause()
+
+  queue.empty = function () {
+    t.notOk(completed, 'the task has not completed yet')
+  }
+
+  queue.push(1, done)
+
+  queue.resume()
+
+  function done (err, result) {
+    completed = true
+    t.error(err, 'no error')
+  }
+
+  function worker (arg, cb) {
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})
+
+test('kill', function (t) {
+  t.plan(5)
+
+  var queue = buildQueue(worker, 1)
+  var expected = [1]
+
+  var predrain = queue.drain
+
+  queue.drain = function drain () {
+    t.fail('drain should never be called')
+  }
+
+  queue.push(1, done)
+  queue.push(4, done)
+  queue.unshift(3, done)
+  queue.unshift(2, done)
+  queue.kill()
+
+  function done (err, result) {
+    t.error(err, 'no error')
+    setImmediate(function () {
+      t.equal(queue.length(), 0, 'no queued tasks')
+      t.equal(queue.running(), 0, 'no running tasks')
+      t.equal(queue.drain, predrain, 'drain is back to default')
+    })
+  }
+
+  function worker (arg, cb) {
+    t.equal(expected.shift(), arg, 'tasks come in order')
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})

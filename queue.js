@@ -25,7 +25,9 @@ function fastqueue (context, worker, concurrency) {
     resume: resume,
     idle: idle,
     length: length,
-    unshift: unshift
+    unshift: unshift,
+    empty: noop,
+    kill: kill
   }
 
   return self
@@ -122,12 +124,21 @@ function fastqueue (context, worker, concurrency) {
         queueHead = next.next
         next.next = null
         worker.call(context, next.value, next.worked)
+        if (queueTail === null) {
+          self.empty()
+        }
       } else {
         _running--
       }
     } else if (--_running === 0) {
       self.drain()
     }
+  }
+
+  function kill () {
+    queueHead = null
+    queueTail = null
+    self.drain = noop
   }
 }
 
