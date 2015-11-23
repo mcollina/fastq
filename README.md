@@ -5,9 +5,10 @@ Fast, in memory work queue. `fastq` is API compatible with
 
 Benchmarks (1 million tasks):
 
-* setImmedidate: 1313ms
-* fastq: 1462ms
-* async.queue: 3989ms
+* setImmedidate: 1359ms
+* fastq: 1492ms
+* async.queue: 4039ms
+* neoAsync.queue: 4476ms
 
 Obtained on node 4.2.2, on a MacBook Pro 2014 (i7, 16GB of RAM).
 

@@ -29,6 +29,7 @@
   "homepage": "https://github.com/mcollina/fastq#readme",
   "devDependencies": {
     "async": "^1.2.1",
+    "neo-async": "^1.7.0",
     "pre-commit": "^1.0.10",
     "standard": "^5.2.0",
     "tap-spec": "^4.0.0",

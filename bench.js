@@ -3,7 +3,9 @@
 var max = 1000000
 var fastqueue = require('./')(worker, 1)
 var async = require('async')
+var neo = require('neo-async')
 var asyncqueue = async.queue(worker, 1)
+var neoqueue = neo.queue(worker, 1)
 
 function bench (func, done) {
   var key = max + '*' + func.name
@@ -24,12 +26,16 @@ function bench (func, done) {
   }
 }
 
-function benchFastQueue (done) {
+function benchFastQ (done) {
   fastqueue.push(42, done)
 }
 
 function benchAsyncQueue (done) {
   asyncqueue.push(42, done)
+}
+
+function benchNeoQueue (done) {
+  neoqueue.push(42, done)
 }
 
 function worker (arg, cb) {
@@ -43,7 +49,8 @@ function benchSetImmediate (cb) {
 function runBench (done) {
   async.eachSeries([
     benchSetImmediate,
-    benchFastQueue,
+    benchFastQ,
+    benchNeoQueue,
     benchAsyncQueue
   ], bench, done)
 }
