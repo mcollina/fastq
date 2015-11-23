@@ -1,6 +1,7 @@
 # fastq&nbsp;&nbsp;[![build status](https://secure.travis-ci.org/mcollina/fastq.png)](http://travis-ci.org/mcollina/fastq)
 
-Fast, in memory work queue.
+Fast, in memory work queue. `fastq` is API compatible with
+[`async.queue`](https://github.com/caolan/async#queueworker-concurrency)
 
 Benchmarks (1 million tasks):
 
