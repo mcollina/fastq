@@ -71,7 +71,7 @@ function fastqueue (context, worker, concurrency) {
     current.context = context
     current.release = release
     current.value = value
-    current.callback = done
+    current.callback = done || noop
 
     if (_running === self.concurrency || self.paused) {
       if (queueTail) {
@@ -94,7 +94,7 @@ function fastqueue (context, worker, concurrency) {
     current.context = context
     current.release = release
     current.value = value
-    current.callback = done
+    current.callback = done || noop
 
     if (_running === self.concurrency || self.paused) {
       if (queueHead) {

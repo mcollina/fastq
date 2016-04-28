@@ -419,3 +419,29 @@ test('pause && idle', function (t) {
     })
   }
 })
+
+test('push without cb', function (t) {
+  t.plan(1)
+
+  var queue = buildQueue(worker, 1)
+
+  queue.push(42)
+
+  function worker (arg, cb) {
+    t.equal(arg, 42)
+    cb()
+  }
+})
+
+test('unshift without cb', function (t) {
+  t.plan(1)
+
+  var queue = buildQueue(worker, 1)
+
+  queue.unshift(42)
+
+  function worker (arg, cb) {
+    t.equal(arg, 42)
+    cb()
+  }
+})
