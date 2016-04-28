@@ -62,7 +62,7 @@ function fastqueue (context, worker, concurrency) {
   }
 
   function idle () {
-    return _running === 0
+    return _running === 0 && self.length() === 0
   }
 
   function push (value, done) {

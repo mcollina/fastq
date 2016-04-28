@@ -384,3 +384,38 @@ test('kill', function (t) {
     })
   }
 })
+
+test('pause && idle', function (t) {
+  t.plan(11)
+
+  var queue = buildQueue(worker, 1)
+  var worked = false
+
+  t.notOk(queue.paused, 'it should not be paused')
+  t.ok(queue.idle(), 'should be idle')
+
+  queue.pause()
+
+  queue.push(42, function (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+  })
+
+  t.notOk(worked, 'it should be paused')
+  t.ok(queue.paused, 'it should be paused')
+  t.notOk(queue.idle(), 'should not be idle')
+
+  queue.resume()
+
+  t.notOk(queue.paused, 'it should not be paused')
+  t.notOk(queue.idle(), 'it should not be idle')
+
+  function worker (arg, cb) {
+    t.equal(arg, 42)
+    worked = true
+    process.nextTick(cb.bind(null, null, true))
+    process.nextTick(function () {
+      t.ok(queue.idle(), 'is should be idle')
+    })
+  }
+})
