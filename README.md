@@ -5,7 +5,7 @@ Fast, in memory work queue. `fastq` is API compatible with
 
 Benchmarks (1 million tasks):
 
-* setImmedidate: 1359ms
+* setImmediate: 1359ms
 * fastq: 1492ms
 * async.queue: 4039ms
 * neoAsync.queue: 4476ms
