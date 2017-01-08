@@ -74,6 +74,7 @@ function worker (arg, cb) {
 * <a href="#idle"><code>queue#<b>idle()</b></code></a>
 * <a href="#length"><code>queue#<b>length()</b></code></a>
 * <a href="#kill"><code>queue#<b>kill()</b></code></a>
+* <a href="#killAndDrain"><code>queue#<b>killAndDrain()</b></code></a>
 * <a href="#concurrency"><code>queue#<b>concurrency</b></code></a>
 * <a href="#drain"><code>queue#<b>drain</b></code></a>
 * <a href="#empty"><code>queue#<b>empty</b></code></a>
@@ -139,6 +140,12 @@ Returns the number of tasks waiting to be processed (in the queue).
 
 Removes all tasks waiting to be processed, and reset `drain` to an empty
 function.
+
+-------------------------------------------------------
+<a name="killAndDrain"></a>
+### queue.killAndDrain()
+
+Same than `kill` but the `drain` function will be called before reset to empty.
 
 -------------------------------------------------------
 <a name="concurrency"></a>
