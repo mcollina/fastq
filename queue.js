@@ -27,7 +27,8 @@ function fastqueue (context, worker, concurrency) {
     length: length,
     unshift: unshift,
     empty: noop,
-    kill: kill
+    kill: kill,
+    killAndDrain: killAndDrain
   }
 
   return self
@@ -138,6 +139,13 @@ function fastqueue (context, worker, concurrency) {
   function kill () {
     queueHead = null
     queueTail = null
+    self.drain = noop
+  }
+
+  function killAndDrain () {
+    queueHead = null
+    queueTail = null
+    self.drain()
     self.drain = noop
   }
 }

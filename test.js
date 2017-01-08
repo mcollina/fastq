@@ -385,6 +385,41 @@ test('kill', function (t) {
   }
 })
 
+test('killAndDrain', function (t) {
+  t.plan(6)
+
+  var queue = buildQueue(worker, 1)
+  var expected = [1]
+
+  var predrain = queue.drain
+
+  queue.drain = function drain () {
+    t.pass('drain has been called')
+  }
+
+  queue.push(1, done)
+  queue.push(4, done)
+  queue.unshift(3, done)
+  queue.unshift(2, done)
+  queue.killAndDrain()
+
+  function done (err, result) {
+    t.error(err, 'no error')
+    setImmediate(function () {
+      t.equal(queue.length(), 0, 'no queued tasks')
+      t.equal(queue.running(), 0, 'no running tasks')
+      t.equal(queue.drain, predrain, 'drain is back to default')
+    })
+  }
+
+  function worker (arg, cb) {
+    t.equal(expected.shift(), arg, 'tasks come in order')
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})
+
 test('pause && idle', function (t) {
   t.plan(11)
 
