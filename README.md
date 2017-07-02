@@ -125,8 +125,8 @@ Resume the processing of tasks.
 <a name="idle"></a>
 ### queue.idle()
 
-Returns `true` if there are tasks being processed or waiting to be processed.
-`false` otherwise.
+Returns `false` if there are tasks being processed or waiting to be processed.
+`true` otherwise.
 
 -------------------------------------------------------
 <a name="length"></a>
