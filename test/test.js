@@ -1,7 +1,7 @@
 'use strict'
 
 var test = require('tape')
-var buildQueue = require('./')
+var buildQueue = require('../')
 
 test('worker execution', function (t) {
   t.plan(3)
