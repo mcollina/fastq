@@ -1,0 +1,7 @@
+# Tests files
+test/
+bench.js
+
+# Other
+.travis.yml
+example.js

@@ -41,5 +41,8 @@
   },
   "dependencies": {
     "reusify": "^1.0.4"
-  }
+  },
+  "files": [
+    "queue.js"
+  ]
 }
