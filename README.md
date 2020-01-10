@@ -19,9 +19,9 @@ function call, check out [fastparallel](http://npm.im/fastparallel).
 [![js-standard-style](https://raw.githubusercontent.com/feross/standard/master/badge.png)](https://github.com/feross/standard)
 
   * <a href="#install">Installation</a>
-  * <a href="#basic">Basic Example</a>
+  * <a href="#usage">Usage</a>
   * <a href="#api">API</a>
-  * <a href="#licence">Licence &amp; copyright</a>
+  * <a href="#license">Licence &amp; copyright</a>
 
 ## Install
 
