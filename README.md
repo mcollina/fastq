@@ -9,12 +9,12 @@ Fast, in memory work queue. `fastq` is API compatible with
 
 Benchmarks (1 million tasks):
 
-* setImmediate: 1359ms
-* fastq: 1492ms
-* async.queue: 4039ms
-* neoAsync.queue: 4476ms
+* setImmediate: 812ms
+* fastq: 854ms
+* async.queue: 1298ms
+* neoAsync.queue: 1249ms
 
-Obtained on node 4.2.2, on a MacBook Pro 2014 (i7, 16GB of RAM).
+Obtained on node 12.16.1, on a dedicated server.
 
 If you need zero-overhead series function call, check out
 [fastseries](http://npm.im/fastseries). For zero-overhead parallel
