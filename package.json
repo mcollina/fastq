@@ -4,12 +4,15 @@
   "description": "Fast, in memory work queue",
   "main": "queue.js",
   "scripts": {
-    "lint": "standard",
+    "lint": "standard --verbose | snazzy",
+    "unit": "nyc --lines 100 --branches 100 --functions 100 --check-coverage --reporter=text tape test/test.js",
+    "coverage": "nyc --reporter=html --reporter=cobertura --reporter=text tape test/test.js",
+    "test:report": "npm run lint && npm run unit:report",
+    "test": "npm run lint && npm run unit && npm run typescript",
     "typescript": "tsc --project ./test/tsconfig.json",
-    "test": "standard && tap --100 test/test.js && npm run typescript"
+    "legacy": "tape test/test.js"
   },
   "pre-commit": [
-    "lint",
     "test"
   ],
   "repository": {
@@ -33,8 +36,10 @@
     "neo-async": "^2.6.1",
     "nyc": "^15.0.0",
     "pre-commit": "^1.2.2",
+    "snazzy": "^8.0.0",
     "standard": "^14.0.0",
     "tap": "^14.10.6",
+    "tape": "^4.13.0",
     "typescript": "^3.5.3"
   },
   "dependencies": {

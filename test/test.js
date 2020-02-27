@@ -166,7 +166,7 @@ test('pause in flight && resume', function (t) {
     t.error(err, 'no error')
     t.equal(result, true, 'result matches')
     t.ok(queue.paused, 'it should be paused')
-    process.nextTick(() => queue.resume())
+    process.nextTick(function () { queue.resume() })
   })
 
   queue.push(24, function (err, result) {
