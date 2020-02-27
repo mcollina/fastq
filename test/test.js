@@ -179,7 +179,7 @@ test('pause in flight && resume', function (t) {
 
   function worker (arg, cb) {
     t.equal(arg, expected.shift())
-    process.nextTick(cb, null, true)
+    process.nextTick(function () { cb(null, true) })
   }
 })
 
