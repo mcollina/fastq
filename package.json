@@ -6,8 +6,7 @@
   "scripts": {
     "lint": "standard",
     "typescript": "tsc --project ./test/tsconfig.json",
-    "test": "standard && tape test/test.js | tap-spec && npm run typescript",
-    "coverage": "nyc --reporter=lcov tape test/test.js"
+    "test": "standard && tap --100 test/test.js && npm run typescript"
   },
   "pre-commit": [
     "lint",
@@ -32,11 +31,10 @@
   "devDependencies": {
     "async": "^3.1.0",
     "neo-async": "^2.6.1",
-    "nyc": "^14.1.1",
+    "nyc": "^15.0.0",
     "pre-commit": "^1.2.2",
-    "standard": "^13.0.2",
-    "tap-spec": "^5.0.0",
-    "tape": "^4.11.0",
+    "standard": "^14.0.0",
+    "tap": "^14.10.6",
     "typescript": "^3.5.3"
   },
   "dependencies": {
