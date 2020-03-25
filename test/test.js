@@ -300,6 +300,30 @@ test('length', function (t) {
   }
 })
 
+test('getQueueHead', function (t) {
+  t.plan(7)
+
+  var queue = buildQueue(worker, 1)
+
+  t.equal(queue.getQueueHead(), null, 'nothing waiting')
+  queue.push(42, done)
+  t.equal(queue.getQueueHead(), null, 'nothing waiting')
+  queue.push(42, done)
+  t.equal(queue.getQueueHead(), 42, 'one task waiting')
+  queue.push(42, done)
+  t.equal(queue.getQueueHead(), 42, 'one task waiting')
+
+  function done (err, result) {
+    t.error(err, 'no error')
+  }
+
+  function worker (arg, cb) {
+    setImmediate(function () {
+      cb(null, true)
+    })
+  }
+})
+
 test('unshift', function (t) {
   t.plan(8)
 
