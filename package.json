@@ -1,6 +1,6 @@
 {
   "name": "fastq",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "description": "Fast, in memory work queue",
   "main": "queue.js",
   "scripts": {
@@ -38,8 +38,8 @@
     "pre-commit": "^1.2.2",
     "snazzy": "^8.0.0",
     "standard": "^14.0.0",
-    "tape": "^4.13.0",
-    "typescript": "^3.5.3"
+    "tape": "^4.13.2",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
     "reusify": "^1.0.4"
