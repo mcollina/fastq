@@ -12,6 +12,7 @@ declare namespace fastq {
     resume(): any
     idle(): boolean
     length(): number
+    getQueue(): any[]
     kill(): any
     killAndDrain(): any
     concurrency: number
