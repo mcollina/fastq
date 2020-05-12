@@ -13,6 +13,8 @@ queue.drain()
 
 queue.empty = () => undefined
 
+console.log('the queue tasks are', queue.getQueue())
+
 queue.idle()
 
 queue.kill()
