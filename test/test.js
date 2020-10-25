@@ -548,7 +548,7 @@ test('push with worker throwing error', function (t) {
     t.equal(task, 42, 'The task executed should be passed')
   })
   q.push(42, function (err) {
-    t.ok(err instanceof Error, 'global error handler should catch the error')
+    t.ok(err instanceof Error, 'push callback should catch the error')
     t.match(err.message, /test error/, 'error message should be "test error"')
   })
 })
