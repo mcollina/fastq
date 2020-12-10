@@ -4,8 +4,7 @@
 [![npm version][npm-badge]][npm-url]
 [![Dependency Status][david-badge]][david-url]
 
-Fast, in memory work queue. `fastq` is API compatible with
-[`async.queue`](https://github.com/caolan/async#queueworker-concurrency)
+Fast, in memory work queue.
 
 Benchmarks (1 million tasks):
 
