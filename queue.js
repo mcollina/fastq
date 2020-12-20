@@ -9,6 +9,10 @@ function fastqueue (context, worker, concurrency) {
     context = null
   }
 
+  if (concurrency < 1) {
+    throw new Error('fastqueue concurrency must be greater than 1')
+  }
+
   var cache = reusify(Task)
   var queueHead = null
   var queueTail = null
