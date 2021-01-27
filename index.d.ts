@@ -7,8 +7,8 @@ declare namespace fastq {
   type errorHandler<T = any> = (err: Error, task: T) => void
 
   interface queue<T = any, R = any> {
-    push(task: T, done: done<R>): void
-    unshift(task: T, done: done<R>): void
+    push(task: T, done?: done<R>): void
+    unshift(task: T, done?: done<R>): void
     pause(): any
     resume(): any
     idle(): boolean
