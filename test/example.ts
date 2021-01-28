@@ -9,6 +9,8 @@ queue.push('world', (err, result) => {
   console.log('the result is', result)
 })
 
+queue.push('push without cb')
+
 queue.concurrency
 
 queue.drain()
@@ -35,6 +37,8 @@ queue.unshift('world', (err, result) => {
   if (err) throw err
   console.log('the result is', result)
 })
+
+queue.unshift('unshift without cb')
 
 function worker(task: any, cb: fastq.done) {
   cb(null, 'hello ' + task)
