@@ -1,4 +1,5 @@
 import * as fastq from '../'
+import { promise as queueAsPromised } from '../'
 
 // Basic example
 
@@ -65,3 +66,16 @@ genericsQueue.unshift(7, (err, done) => {
 function genericsWorker(this: GenericsContext, task: number, cb: fastq.done<string>) {
   cb(null, 'the meaning of life is ' + (this.base * task))
 }
+
+const queue2 = queueAsPromised(asyncWorker, 1)
+
+async function asyncWorker(task: any) {
+  return 'hello ' + task
+}
+
+async function run () {
+  await queue.push(42)
+  await queue.unshift(42)
+}
+
+run()
