@@ -37,11 +37,16 @@
     "nyc": "^15.0.0",
     "pre-commit": "^1.2.2",
     "snazzy": "^9.0.0",
-    "standard": "^15.0.0",
+    "standard": "^16.0.0",
     "tape": "^5.0.0",
     "typescript": "^4.0.2"
   },
   "dependencies": {
     "reusify": "^1.0.4"
+  },
+  "standard": {
+    "ignore": [
+      "example.mjs"
+    ]
   }
 }

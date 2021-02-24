@@ -16,7 +16,7 @@ test('concurrency', function (t) {
 })
 
 test('worker execution', async function (t) {
-  var queue = buildQueue(worker, 1)
+  const queue = buildQueue(worker, 1)
 
   const result = await queue.push(42)
 
@@ -29,7 +29,7 @@ test('worker execution', async function (t) {
 })
 
 test('limit', async function (t) {
-  var queue = buildQueue(worker, 1)
+  const queue = buildQueue(worker, 1)
 
   const [res1, res2] = await Promise.all([queue.push(10), queue.push(0)])
   t.equal(res1, 10, 'the result matches')
@@ -42,10 +42,10 @@ test('limit', async function (t) {
 })
 
 test('multiple executions', async function (t) {
-  var queue = buildQueue(worker, 1)
-  var toExec = [1, 2, 3, 4, 5]
-  var expected = ['a', 'b', 'c', 'd', 'e']
-  var count = 0
+  const queue = buildQueue(worker, 1)
+  const toExec = [1, 2, 3, 4, 5]
+  const expected = ['a', 'b', 'c', 'd', 'e']
+  let count = 0
 
   await Promise.all(toExec.map(async function (task, i) {
     const result = await queue.push(task)
@@ -60,8 +60,8 @@ test('multiple executions', async function (t) {
 
 test('set this', async function (t) {
   t.plan(1)
-  var that = {}
-  var queue = buildQueue(that, worker, 1)
+  const that = {}
+  const queue = buildQueue(that, worker, 1)
 
   await queue.push(42)
 
@@ -71,8 +71,8 @@ test('set this', async function (t) {
 })
 
 test('unshift', async function (t) {
-  var queue = buildQueue(worker, 1)
-  var expected = [1, 2, 3, 4]
+  const queue = buildQueue(worker, 1)
+  const expected = [1, 2, 3, 4]
 
   await Promise.all([
     queue.push(1),
@@ -90,7 +90,7 @@ test('unshift', async function (t) {
 
 test('push with worker throwing error', async function (t) {
   t.plan(5)
-  var q = buildQueue(async function (task, cb) {
+  const q = buildQueue(async function (task, cb) {
     throw new Error('test error')
   }, 1)
   q.error(function (err, task) {
@@ -108,7 +108,7 @@ test('push with worker throwing error', async function (t) {
 
 test('unshift with worker throwing error', async function (t) {
   t.plan(2)
-  var q = buildQueue(async function (task, cb) {
+  const q = buildQueue(async function (task, cb) {
     throw new Error('test error')
   }, 1)
   try {

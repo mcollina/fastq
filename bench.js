@@ -1,18 +1,18 @@
 'use strict'
 
-var max = 1000000
-var fastqueue = require('./')(worker, 1)
-var { promisify } = require('util')
-var immediate = promisify(setImmediate)
-var qPromise = require('./').promise(immediate, 1)
-var async = require('async')
-var neo = require('neo-async')
-var asyncqueue = async.queue(worker, 1)
-var neoqueue = neo.queue(worker, 1)
+const max = 1000000
+const fastqueue = require('./')(worker, 1)
+const { promisify } = require('util')
+const immediate = promisify(setImmediate)
+const qPromise = require('./').promise(immediate, 1)
+const async = require('async')
+const neo = require('neo-async')
+const asyncqueue = async.queue(worker, 1)
+const neoqueue = neo.queue(worker, 1)
 
 function bench (func, done) {
-  var key = max + '*' + func.name
-  var count = -1
+  const key = max + '*' + func.name
+  let count = -1
 
   console.time(key)
   end()
