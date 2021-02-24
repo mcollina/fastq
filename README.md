@@ -223,6 +223,8 @@ Creates a new queue with `Promise` apis. It also offers all the methods
 and properties of the object returned by [`fastqueue`](#fastqueue) with the modified
 [`push`](#pushPromise) and [`unshift`](#unshiftPromise) methods.
 
+Node v10+ is required to use the promisified version.
+
 Arguments:
 * `that`, optional context of the `worker` function.
 * `worker`, worker function, it would be called with `that` as `this`,
