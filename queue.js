@@ -214,10 +214,10 @@ function queueAsPromised (context, worker, concurrency) {
       }, cb)
   }
 
-  const queue = fastqueue(context, asyncWrapper, concurrency)
+  var queue = fastqueue(context, asyncWrapper, concurrency)
 
-  const pushCb = queue.push
-  const unshiftCb = queue.unshift
+  var pushCb = queue.push
+  var unshiftCb = queue.unshift
 
   queue.push = push
   queue.unshift = unshift
