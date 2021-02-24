@@ -1,5 +1,7 @@
 'use strict'
 
+/* eslint-disable no-var */
+
 var reusify = require('reusify')
 
 function fastqueue (context, worker, concurrency) {
