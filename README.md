@@ -43,7 +43,7 @@ queue.push(42, function (err, result) {
 })
 
 function worker (arg, cb) {
-  cb(null, 42 * 2)
+  cb(null, arg * 2)
 }
 ```
 
@@ -53,7 +53,7 @@ or
 var queue = require('fastq').promise(worker, 1)
 
 async function worker (arg) {
-  return 42 * 2
+  return arg * 2
 }
 
 async function run () {
@@ -81,7 +81,7 @@ queue.push(42, function (err, result) {
 
 function worker (arg, cb) {
   console.log(this)
-  cb(null, 42 * 2)
+  cb(null, arg * 2)
 }
 ```
 
