@@ -51,7 +51,8 @@
   },
   "standard": {
     "ignore": [
-      "example.mjs"
+      "example.mjs",
+      "queue.mjs"
     ]
   }
 }
