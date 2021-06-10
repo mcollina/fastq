@@ -85,6 +85,35 @@ function worker (arg, cb) {
 }
 ```
 
+### Using with TypeScript
+
+```ts
+'use strict'
+
+import * as fastq from "fastq";
+import type { queue, done } from "fastq";
+
+type Task = {
+  id: number  
+}
+
+const q: queue<Task> = fastq(worker, 1)
+
+q.push({ id: 42})
+
+function worker (arg: Task, cb: done) {
+  return Promise.resolve()
+          .then(() => {
+            console.log(arg.id)
+            cb(null)
+          })
+          .catch((err) => {
+            console.error(err)
+            cb(err)
+          })
+}
+```
+
 ## API
 
 * <a href="#fastqueue"><code>fastqueue()</code></a>
