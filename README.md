@@ -123,13 +123,11 @@ const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 1)
 q.push({ id: 42})
 
 async function asyncWorker (arg: Task): Promise<void> {
-  return Promise.resolve()
-    .then(() => {
-      console.log(arg.id)
-    })
-    .catch((err) => {
-      console.error(err)
-    })
+  try {
+    console.log(arg.id)  
+  } catch (err) {
+    console.error(err)
+  }
 }
 ```
 
