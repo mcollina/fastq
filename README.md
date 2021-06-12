@@ -30,12 +30,12 @@ function call, check out [fastparallel](http://npm.im/fastparallel).
 
 `npm i fastq --save`
 
-## Usage
+## Usage (callback API)
 
 ```js
 'use strict'
 
-var queue = require('fastq')(worker, 1)
+const queue = require('fastq')(worker, 1)
 
 queue.push(42, function (err, result) {
   if (err) { throw err }
@@ -47,10 +47,10 @@ function worker (arg, cb) {
 }
 ```
 
-or
+## Usage (promise API)
 
 ```js
-var queue = require('fastq').promise(worker, 1)
+const queue = require('fastq').promise(worker, 1)
 
 async function worker (arg) {
   return arg * 2
@@ -59,19 +59,18 @@ async function worker (arg) {
 async function run () {
   const result = await queue.push(42)
   console.log('the result is', result)
-})
 }
 
 run()
 ```
 
-### Setting this
+### Setting "this"
 
 ```js
 'use strict'
 
-var that = { hello: 'world' }
-var queue = require('fastq')(that, worker, 1)
+const that = { hello: 'world' }
+const queue = require('fastq')(that, worker, 1)
 
 queue.push(42, function (err, result) {
   if (err) { throw err }
@@ -85,7 +84,7 @@ function worker (arg, cb) {
 }
 ```
 
-### Using with TypeScript
+### Using with TypeScript (callback API)
 
 ```ts
 'use strict'
@@ -102,15 +101,35 @@ const q: queue<Task> = fastq(worker, 1)
 q.push({ id: 42})
 
 function worker (arg: Task, cb: done) {
+  console.log(arg.id)
+  cb(null)
+}
+```
+
+### Using with TypeScript (promise API)
+
+```ts
+'use strict'
+
+import * as fastq from "fastq";
+import type { queueAsPromised } from "fastq";
+
+type Task = {
+  id: number
+}
+
+const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 1)
+
+q.push({ id: 42})
+
+async function asyncWorker (arg: Task): Promise<void> {
   return Promise.resolve()
-          .then(() => {
-            console.log(arg.id)
-            cb(null)
-          })
-          .catch((err) => {
-            console.error(err)
-            cb(err)
-          })
+    .then(() => {
+      console.log(arg.id)
+    })
+    .catch((err) => {
+      console.error(err)
+    })
 }
 ```
 
