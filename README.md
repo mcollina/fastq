@@ -123,11 +123,8 @@ const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 1)
 q.push({ id: 42})
 
 async function asyncWorker (arg: Task): Promise<void> {
-  try {
-    console.log(arg.id)  
-  } catch (err) {
-    console.error(err)
-  }
+  // No need for a try-catch block, fastq handles errors automatically
+  console.log(arg.id)  
 }
 ```
 
