@@ -30,12 +30,12 @@ function call, check out [fastparallel](http://npm.im/fastparallel).
 
 `npm i fastq --save`
 
-## Usage
+## Usage (callback API)
 
 ```js
 'use strict'
 
-var queue = require('fastq')(worker, 1)
+const queue = require('fastq')(worker, 1)
 
 queue.push(42, function (err, result) {
   if (err) { throw err }
@@ -47,10 +47,10 @@ function worker (arg, cb) {
 }
 ```
 
-or
+## Usage (promise API)
 
 ```js
-var queue = require('fastq').promise(worker, 1)
+const queue = require('fastq').promise(worker, 1)
 
 async function worker (arg) {
   return arg * 2
@@ -59,19 +59,18 @@ async function worker (arg) {
 async function run () {
   const result = await queue.push(42)
   console.log('the result is', result)
-})
 }
 
 run()
 ```
 
-### Setting this
+### Setting "this"
 
 ```js
 'use strict'
 
-var that = { hello: 'world' }
-var queue = require('fastq')(that, worker, 1)
+const that = { hello: 'world' }
+const queue = require('fastq')(that, worker, 1)
 
 queue.push(42, function (err, result) {
   if (err) { throw err }
@@ -82,6 +81,50 @@ queue.push(42, function (err, result) {
 function worker (arg, cb) {
   console.log(this)
   cb(null, arg * 2)
+}
+```
+
+### Using with TypeScript (callback API)
+
+```ts
+'use strict'
+
+import * as fastq from "fastq";
+import type { queue, done } from "fastq";
+
+type Task = {
+  id: number  
+}
+
+const q: queue<Task> = fastq(worker, 1)
+
+q.push({ id: 42})
+
+function worker (arg: Task, cb: done) {
+  console.log(arg.id)
+  cb(null)
+}
+```
+
+### Using with TypeScript (promise API)
+
+```ts
+'use strict'
+
+import * as fastq from "fastq";
+import type { queueAsPromised } from "fastq";
+
+type Task = {
+  id: number
+}
+
+const q: queueAsPromised<Task> = fastq.promise(asyncWorker, 1)
+
+q.push({ id: 42}).catch((err) => console.error(err))
+
+async function asyncWorker (arg: Task): Promise<void> {
+  // No need for a try-catch block, fastq handles errors automatically
+  console.log(arg.id)  
 }
 ```
 
