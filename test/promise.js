@@ -4,6 +4,7 @@ const test = require('tape')
 const buildQueue = require('../').promise
 const { promisify } = require('util')
 const sleep = promisify(setTimeout)
+const immediate = promisify(setImmediate)
 
 test('concurrency', function (t) {
   t.plan(2)
@@ -117,4 +118,34 @@ test('unshift with worker throwing error', async function (t) {
     t.ok(err instanceof Error, 'push callback should catch the error')
     t.match(err.message, /test error/, 'error message should be "test error"')
   }
+})
+
+test('no unhandledRejection (push)', async function (t) {
+  function handleRejection () {
+    t.fail('unhandledRejection')
+  }
+  process.once('unhandledRejection', handleRejection)
+  const q = buildQueue(async function (task, cb) {
+    throw new Error('test error')
+  }, 1)
+
+  q.push(42)
+
+  await immediate()
+  process.removeListener('unhandledRejection', handleRejection)
+})
+
+test('no unhandledRejection (unshift)', async function (t) {
+  function handleRejection () {
+    t.fail('unhandledRejection')
+  }
+  process.once('unhandledRejection', handleRejection)
+  const q = buildQueue(async function (task, cb) {
+    throw new Error('test error')
+  }, 1)
+
+  q.unshift(42)
+
+  await immediate()
+  process.removeListener('unhandledRejection', handleRejection)
 })
