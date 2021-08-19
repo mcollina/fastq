@@ -227,7 +227,7 @@ function queueAsPromised (context, worker, concurrency) {
   return queue
 
   function push (value) {
-    const p = new Promise(function (resolve, reject) {
+    var p = new Promise(function (resolve, reject) {
       pushCb(value, function (err, result) {
         if (err) {
           reject(err)
@@ -246,7 +246,7 @@ function queueAsPromised (context, worker, concurrency) {
   }
 
   function unshift (value) {
-    const p = new Promise(function (resolve, reject) {
+    var p = new Promise(function (resolve, reject) {
       unshiftCb(value, function (err, result) {
         if (err) {
           reject(err)
