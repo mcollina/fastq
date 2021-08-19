@@ -278,14 +278,18 @@ Arguments:
 <a name="pushPromise"></a>
 #### queue.push(task) => Promise
 
-Add a task at the end of the queue. The returned `Promise`  will be fulfilled
-when the task is processed.
+Add a task at the end of the queue. The returned `Promise`  will be fulfilled (rejected)
+when the task is completed successfully (unsuccessfully).
+
+This promise could be ignored as it will not lead to a `'unhandledRejection'`.
 
 <a name="unshiftPromise"></a>
 #### queue.unshift(task) => Promise
 
-Add a task at the beginning of the queue. The returned `Promise`  will be fulfilled
-when the task is processed.
+Add a task at the beginning of the queue. The returned `Promise`  will be fulfilled (rejected)
+when the task is completed successfully (unsuccessfully).
+
+This promise could be ignored as it will not lead to a `'unhandledRejection'`.
 
 ## License
 
