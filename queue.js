@@ -223,6 +223,7 @@ function queueAsPromised (context, worker, concurrency) {
 
   queue.push = push
   queue.unshift = unshift
+  queue.drained = drained
 
   return queue
 
@@ -264,13 +265,12 @@ function queueAsPromised (context, worker, concurrency) {
     return p
   }
 
-  function runToCompletion () {
-    var p = new Promise(function (resolve, reject) {
+  function drained () {
+    var previousDrain = queue.drain
+
+    var p = new Promise(function (resolve) {
       queue.drain = function () {
-        // call already assigned drain function
-        if (typeof queue.drain === 'function') {
-          queue.drain()
-        }
+        previousDrain()
         resolve()
       }
     })

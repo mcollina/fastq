@@ -59,18 +59,56 @@ test('multiple executions', async function (t) {
   }
 })
 
-test('runToCompletion', async function (t) {
-  const queue = buildQueue(worker, 1)
-  const toExec = [1, 2, 3, 4, 5]
+test('drained', async function (t) {
+  const queue = buildQueue(worker, 2)
+
+  const toExec = new Array(10).fill(10)
   let count = 0
 
   async function worker (arg) {
+    await sleep(arg)
     count++
-    return
   }
 
-  await queue.runToCompletion()
-  t.equal(count, 5)
+  toExec.forEach(function (i) {
+    queue.push(i)
+  })
+
+  await queue.drained()
+
+  toExec.forEach(function (i) {
+    queue.push(i)
+  })
+
+  await queue.drained()
+
+  t.equal(count, toExec.length * 2)
+})
+
+test('drained with drain function', async function (t) {
+  let drainCalled = false
+  const queue = buildQueue(worker, 2)
+
+  queue.drain = function () {
+    drainCalled = true
+  }
+
+  const toExec = new Array(10).fill(10)
+  let count = 0
+
+  async function worker (arg) {
+    await sleep(arg)
+    count++
+  }
+
+  toExec.forEach(function () {
+    queue.push()
+  })
+
+  await queue.drained()
+
+  t.equal(count, toExec.length)
+  t.equal(drainCalled, true)
 })
 
 test('set this', async function (t) {
