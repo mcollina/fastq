@@ -263,6 +263,20 @@ function queueAsPromised (context, worker, concurrency) {
 
     return p
   }
+
+  function runToCompletion () {
+    var p = new Promise(function (resolve, reject) {
+      queue.drain = function () {
+        // call already assigned drain function
+        if (typeof queue.drain === 'function') {
+          queue.drain()
+        }
+        resolve()
+      }
+    })
+
+    return p
+  }
 }
 
 module.exports = fastqueue

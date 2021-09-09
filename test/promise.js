@@ -59,6 +59,20 @@ test('multiple executions', async function (t) {
   }
 })
 
+test('runToCompletion', async function (t) {
+  const queue = buildQueue(worker, 1)
+  const toExec = [1, 2, 3, 4, 5]
+  let count = 0
+
+  async function worker (arg) {
+    count++
+    return
+  }
+
+  await queue.runToCompletion()
+  t.equal(count, 5)
+})
+
 test('set this', async function (t) {
   t.plan(1)
   const that = {}
