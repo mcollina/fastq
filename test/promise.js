@@ -87,6 +87,22 @@ test('drained', async function (t) {
   t.equal(count, toExec.length * 2)
 })
 
+test('drained with exception should not throw', async function (t) {
+  const queue = buildQueue(worker, 2)
+
+  const toExec = new Array(10).fill(10)
+
+  async function worker () {
+    throw new Error('foo')
+  }
+
+  toExec.forEach(function (i) {
+    queue.push(i)
+  })
+
+  await queue.drained()
+})
+
 test('drained with drain function', async function (t) {
   let drainCalled = false
   const queue = buildQueue(worker, 2)
