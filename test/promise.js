@@ -76,6 +76,8 @@ test('drained', async function (t) {
 
   await queue.drained()
 
+  t.equal(count, toExec.length)
+
   toExec.forEach(function (i) {
     queue.push(i)
   })
