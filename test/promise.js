@@ -59,6 +59,76 @@ test('multiple executions', async function (t) {
   }
 })
 
+test('drained', async function (t) {
+  const queue = buildQueue(worker, 2)
+
+  const toExec = new Array(10).fill(10)
+  let count = 0
+
+  async function worker (arg) {
+    await sleep(arg)
+    count++
+  }
+
+  toExec.forEach(function (i) {
+    queue.push(i)
+  })
+
+  await queue.drained()
+
+  t.equal(count, toExec.length)
+
+  toExec.forEach(function (i) {
+    queue.push(i)
+  })
+
+  await queue.drained()
+
+  t.equal(count, toExec.length * 2)
+})
+
+test('drained with exception should not throw', async function (t) {
+  const queue = buildQueue(worker, 2)
+
+  const toExec = new Array(10).fill(10)
+
+  async function worker () {
+    throw new Error('foo')
+  }
+
+  toExec.forEach(function (i) {
+    queue.push(i)
+  })
+
+  await queue.drained()
+})
+
+test('drained with drain function', async function (t) {
+  let drainCalled = false
+  const queue = buildQueue(worker, 2)
+
+  queue.drain = function () {
+    drainCalled = true
+  }
+
+  const toExec = new Array(10).fill(10)
+  let count = 0
+
+  async function worker (arg) {
+    await sleep(arg)
+    count++
+  }
+
+  toExec.forEach(function () {
+    queue.push()
+  })
+
+  await queue.drained()
+
+  t.equal(count, toExec.length)
+  t.equal(drainCalled, true)
+})
+
 test('set this', async function (t) {
   t.plan(1)
   const that = {}

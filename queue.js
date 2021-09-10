@@ -223,6 +223,7 @@ function queueAsPromised (context, worker, concurrency) {
 
   queue.push = push
   queue.unshift = unshift
+  queue.drained = drained
 
   return queue
 
@@ -260,6 +261,19 @@ function queueAsPromised (context, worker, concurrency) {
     // make the error bubble up to the user but
     // not lead to a unhandledRejection
     p.catch(noop)
+
+    return p
+  }
+
+  function drained () {
+    var previousDrain = queue.drain
+
+    var p = new Promise(function (resolve) {
+      queue.drain = function () {
+        previousDrain()
+        resolve()
+      }
+    })
 
     return p
   }

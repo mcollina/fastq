@@ -27,6 +27,7 @@ declare namespace fastq {
   interface queueAsPromised<T = any, R = any> extends queue<T, R> {
     push(task: T): Promise<R>
     unshift(task: T): Promise<R>
+    drained(): Promise<void>
   }
 
   function promise<C, T = any, R = any>(context: C, worker: fastq.asyncWorker<C, T, R>, concurrency: number): fastq.queueAsPromised<T, R>

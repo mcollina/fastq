@@ -93,7 +93,7 @@ import * as fastq from "fastq";
 import type { queue, done } from "fastq";
 
 type Task = {
-  id: number  
+  id: number
 }
 
 const q: queue<Task> = fastq(worker, 1)
@@ -124,7 +124,7 @@ q.push({ id: 42}).catch((err) => console.error(err))
 
 async function asyncWorker (arg: Task): Promise<void> {
   // No need for a try-catch block, fastq handles errors automatically
-  console.log(arg.id)  
+  console.log(arg.id)
 }
 ```
 
@@ -288,6 +288,13 @@ This promise could be ignored as it will not lead to a `'unhandledRejection'`.
 
 Add a task at the beginning of the queue. The returned `Promise`  will be fulfilled (rejected)
 when the task is completed successfully (unsuccessfully).
+
+This promise could be ignored as it will not lead to a `'unhandledRejection'`.
+
+<a name="drained"></a>
+#### queue.drained() => Promise
+
+Wait for the queue to be drained. The returned `Promise` will be resolved when all tasks in the queue have been processed by a worker.
 
 This promise could be ignored as it will not lead to a `'unhandledRejection'`.
 
