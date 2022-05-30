@@ -225,7 +225,7 @@ Same than `kill` but the `drain` function will be called before reset to empty.
 ### queue.error(handler)
 
 Set a global error handler. `handler(err, task)` will be called
-when any of the tasks return an error.
+each time a task is completed, `err` will be not null if the task has thrown an error.
 
 -------------------------------------------------------
 <a name="concurrency"></a>
