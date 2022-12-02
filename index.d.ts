@@ -17,7 +17,7 @@ declare namespace fastq {
     getQueue(): T[]
     kill(): any
     killAndDrain(): any
-    error(handler: errorHandler): void
+    error(handler: errorHandler<T>): void
     concurrency: number
     drain(): any
     empty: () => void
