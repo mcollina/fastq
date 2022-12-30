@@ -129,6 +129,33 @@ test('drained with drain function', async function (t) {
   t.equal(drainCalled, true)
 })
 
+test('drained while idle should resolve', async function (t) {
+  const queue = buildQueue(worker, 2)
+
+  async function worker (arg) {
+    await sleep(arg)
+  }
+
+  await queue.drained()
+})
+
+test('drained while idle should not call the drain function', async function (t) {
+  let drainCalled = false
+  const queue = buildQueue(worker, 2)
+
+  queue.drain = function () {
+    drainCalled = true
+  }
+
+  async function worker (arg) {
+    await sleep(arg)
+  }
+
+  await queue.drained()
+
+  t.equal(drainCalled, false)
+})
+
 test('set this', async function (t) {
   t.plan(1)
   const that = {}
