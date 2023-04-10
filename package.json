@@ -39,7 +39,7 @@
     "snazzy": "^9.0.0",
     "standard": "^16.0.0",
     "tape": "^5.0.0",
-    "typescript": "^4.0.2"
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "reusify": "^1.0.4"
