@@ -12,6 +12,7 @@ declare namespace fastq {
     unshift(task: T, done?: done<R>): void
     pause(): any
     resume(): any
+    running(): number
     idle(): boolean
     length(): number
     getQueue(): T[]
