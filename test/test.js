@@ -137,16 +137,22 @@ test('drain', function (t) {
 })
 
 test('pause && resume', function (t) {
-  t.plan(7)
+  t.plan(13)
 
   var queue = buildQueue(worker, 1)
   var worked = false
+  var expected = [42, 24]
 
   t.notOk(queue.paused, 'it should not be paused')
 
   queue.pause()
 
   queue.push(42, function (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+  })
+
+  queue.push(24, function (err, result) {
     t.error(err, 'no error')
     t.equal(result, true, 'result matches')
   })
@@ -155,22 +161,24 @@ test('pause && resume', function (t) {
   t.ok(queue.paused, 'it should be paused')
 
   queue.resume()
+  queue.pause()
+  queue.resume()
   queue.resume() // second resume is a no-op
 
-  t.notOk(queue.paused, 'it should not be paused')
-
   function worker (arg, cb) {
-    t.equal(arg, 42)
+    t.notOk(queue.paused, 'it should not be paused')
+    t.ok(queue.running() <= queue.concurrency, 'should respect the concurrency')
+    t.equal(arg, expected.shift())
     worked = true
-    cb(null, true)
+    process.nextTick(function () { cb(null, true) })
   }
 })
 
 test('pause in flight && resume', function (t) {
-  t.plan(9)
+  t.plan(16)
 
   var queue = buildQueue(worker, 1)
-  var expected = [42, 24]
+  var expected = [42, 24, 12]
 
   t.notOk(queue.paused, 'it should not be paused')
 
@@ -178,7 +186,11 @@ test('pause in flight && resume', function (t) {
     t.error(err, 'no error')
     t.equal(result, true, 'result matches')
     t.ok(queue.paused, 'it should be paused')
-    process.nextTick(function () { queue.resume() })
+    process.nextTick(function () {
+      queue.resume()
+      queue.pause()
+      queue.resume()
+    })
   })
 
   queue.push(24, function (err, result) {
@@ -187,9 +199,16 @@ test('pause in flight && resume', function (t) {
     t.notOk(queue.paused, 'it should not be paused')
   })
 
+  queue.push(12, function (err, result) {
+    t.error(err, 'no error')
+    t.equal(result, true, 'result matches')
+    t.notOk(queue.paused, 'it should not be paused')
+  })
+
   queue.pause()
 
   function worker (arg, cb) {
+    t.ok(queue.running() <= queue.concurrency, 'should respect the concurrency')
     t.equal(arg, expected.shift())
     process.nextTick(function () { cb(null, true) })
   }
