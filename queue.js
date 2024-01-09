@@ -96,7 +96,7 @@ function fastqueue (context, worker, concurrency) {
     current.callback = done || noop
     current.errorHandler = errorHandler
 
-    if (_running === self.concurrency || self.paused) {
+    if (_running >= self.concurrency || self.paused) {
       if (queueTail) {
         queueTail.next = current
         queueTail = current
@@ -120,7 +120,7 @@ function fastqueue (context, worker, concurrency) {
     current.callback = done || noop
     current.errorHandler = errorHandler
 
-    if (_running === self.concurrency || self.paused) {
+    if (_running >= self.concurrency || self.paused) {
       if (queueHead) {
         current.next = queueHead
         queueHead = current
@@ -140,7 +140,7 @@ function fastqueue (context, worker, concurrency) {
       cache.release(holder)
     }
     var next = queueHead
-    if (next) {
+    if (next && _running <= self.concurrency) {
       if (!self.paused) {
         if (queueTail === queueHead) {
           queueTail = null

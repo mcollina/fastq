@@ -215,10 +215,9 @@ test('pause in flight && resume', function (t) {
 })
 
 test('altering concurrency', function (t) {
-  t.plan(7)
+  t.plan(20)
 
   var queue = buildQueue(worker, 1)
-  var count = 0
 
   queue.pause()
 
@@ -231,15 +230,23 @@ test('altering concurrency', function (t) {
 
   t.equal(queue.running(), 2, '2 jobs running')
 
+  queue.concurrency = 1
+
+  t.equal(queue.running(), 2, '2 jobs running') // running jobs can't be killed
+
+  queue.push(24, workDone)
+  queue.push(24, workDone)
+  queue.push(24, workDone)
+  queue.push(24, workDone)
+
   function workDone (err, result) {
     t.error(err, 'no error')
     t.equal(result, true, 'result matches')
   }
 
   function worker (arg, cb) {
-    t.equal(0, count, 'works in parallel')
+    t.ok(queue.running() <= queue.concurrency, 'should respect the concurrency')
     setImmediate(function () {
-      count++
       cb(null, true)
     })
   }
