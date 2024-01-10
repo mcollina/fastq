@@ -11,8 +11,8 @@ function fastqueue (context, worker, concurrency) {
     context = null
   }
 
-  if (concurrency < 1) {
-    throw new Error('fastqueue concurrency must be greater than 1')
+  if (!(concurrency >= 1)) {
+    throw new Error('fastqueue concurrency must be equal to or greater than 1')
   }
 
   var cache = reusify(Task)

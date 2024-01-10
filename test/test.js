@@ -6,8 +6,9 @@ var test = require('tape')
 var buildQueue = require('../')
 
 test('concurrency', function (t) {
-  t.plan(2)
+  t.plan(3)
   t.throws(buildQueue.bind(null, worker, 0))
+  t.throws(buildQueue.bind(null, worker, NaN))
   t.doesNotThrow(buildQueue.bind(null, worker, 1))
 
   function worker (arg, cb) {
