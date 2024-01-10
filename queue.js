@@ -32,6 +32,9 @@ function fastqueue (context, worker, _concurrency) {
       return _concurrency
     },
     set concurrency (value) {
+      if (!(value >= 1)) {
+        throw new Error('fastqueue concurrency must be equal to or greater than 1')
+      }
       _concurrency = value
 
       if (self.paused) return
