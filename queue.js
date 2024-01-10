@@ -4,14 +4,14 @@
 
 var reusify = require('reusify')
 
-function fastqueue (context, worker, concurrency) {
+function fastqueue (context, worker, _concurrency) {
   if (typeof context === 'function') {
-    concurrency = worker
+    _concurrency = worker
     worker = context
     context = null
   }
 
-  if (!(concurrency >= 1)) {
+  if (!(_concurrency >= 1)) {
     throw new Error('fastqueue concurrency must be equal to or greater than 1')
   }
 
@@ -27,7 +27,20 @@ function fastqueue (context, worker, concurrency) {
     saturated: noop,
     pause: pause,
     paused: false,
-    concurrency: concurrency,
+
+    get concurrency () {
+      return _concurrency
+    },
+    set concurrency (value) {
+      _concurrency = value
+
+      if (self.paused) return
+      for (; queueHead && _running < self.concurrency;) {
+        _running++
+        release()
+      }
+    },
+
     running: running,
     resume: resume,
     idle: idle,
@@ -203,9 +216,9 @@ function Task () {
   }
 }
 
-function queueAsPromised (context, worker, concurrency) {
+function queueAsPromised (context, worker, _concurrency) {
   if (typeof context === 'function') {
-    concurrency = worker
+    _concurrency = worker
     worker = context
     context = null
   }
@@ -217,7 +230,7 @@ function queueAsPromised (context, worker, concurrency) {
       }, cb)
   }
 
-  var queue = fastqueue(context, asyncWrapper, concurrency)
+  var queue = fastqueue(context, asyncWrapper, _concurrency)
 
   var pushCb = queue.push
   var unshiftCb = queue.unshift

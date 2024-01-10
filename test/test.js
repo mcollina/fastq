@@ -216,24 +216,30 @@ test('pause in flight && resume', function (t) {
 })
 
 test('altering concurrency', function (t) {
-  t.plan(20)
+  t.plan(24)
 
   var queue = buildQueue(worker, 1)
 
+  queue.push(24, workDone)
+  queue.push(24, workDone)
+  queue.push(24, workDone)
+
   queue.pause()
 
-  queue.push(24, workDone)
-  queue.push(24, workDone)
-
+  queue.concurrency = 3 // concurrency changes are ignored while paused
   queue.concurrency = 2
 
   queue.resume()
 
   t.equal(queue.running(), 2, '2 jobs running')
 
+  queue.concurrency = 3
+
+  t.equal(queue.running(), 3, '3 jobs running')
+
   queue.concurrency = 1
 
-  t.equal(queue.running(), 2, '2 jobs running') // running jobs can't be killed
+  t.equal(queue.running(), 3, '3 jobs running') // running jobs can't be killed
 
   queue.push(24, workDone)
   queue.push(24, workDone)
