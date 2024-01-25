@@ -38,7 +38,7 @@ function fastqueue (context, worker, _concurrency) {
       _concurrency = value
 
       if (self.paused) return
-      for (; queueHead && _running < self.concurrency;) {
+      for (; queueHead && _running < _concurrency;) {
         _running++
         release()
       }
@@ -93,7 +93,7 @@ function fastqueue (context, worker, _concurrency) {
   function resume () {
     if (!self.paused) return
     self.paused = false
-    for (; queueHead && _running < self.concurrency;) {
+    for (; queueHead && _running < _concurrency;) {
       _running++
       release()
     }
@@ -112,7 +112,7 @@ function fastqueue (context, worker, _concurrency) {
     current.callback = done || noop
     current.errorHandler = errorHandler
 
-    if (_running >= self.concurrency || self.paused) {
+    if (_running >= _concurrency || self.paused) {
       if (queueTail) {
         queueTail.next = current
         queueTail = current
@@ -136,7 +136,7 @@ function fastqueue (context, worker, _concurrency) {
     current.callback = done || noop
     current.errorHandler = errorHandler
 
-    if (_running >= self.concurrency || self.paused) {
+    if (_running >= _concurrency || self.paused) {
       if (queueHead) {
         current.next = queueHead
         queueHead = current
@@ -156,7 +156,7 @@ function fastqueue (context, worker, _concurrency) {
       cache.release(holder)
     }
     var next = queueHead
-    if (next && _running <= self.concurrency) {
+    if (next && _running <= _concurrency) {
       if (!self.paused) {
         if (queueTail === queueHead) {
           queueTail = null
