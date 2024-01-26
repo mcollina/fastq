@@ -4,15 +4,15 @@
 
 var reusify = require('reusify')
 
-function fastqueue (context, worker, concurrency) {
+function fastqueue (context, worker, _concurrency) {
   if (typeof context === 'function') {
-    concurrency = worker
+    _concurrency = worker
     worker = context
     context = null
   }
 
-  if (concurrency < 1) {
-    throw new Error('fastqueue concurrency must be greater than 1')
+  if (!(_concurrency >= 1)) {
+    throw new Error('fastqueue concurrency must be equal to or greater than 1')
   }
 
   var cache = reusify(Task)
@@ -27,7 +27,23 @@ function fastqueue (context, worker, concurrency) {
     saturated: noop,
     pause: pause,
     paused: false,
-    concurrency: concurrency,
+
+    get concurrency () {
+      return _concurrency
+    },
+    set concurrency (value) {
+      if (!(value >= 1)) {
+        throw new Error('fastqueue concurrency must be equal to or greater than 1')
+      }
+      _concurrency = value
+
+      if (self.paused) return
+      for (; queueHead && _running < _concurrency;) {
+        _running++
+        release()
+      }
+    },
+
     running: running,
     resume: resume,
     idle: idle,
@@ -77,7 +93,7 @@ function fastqueue (context, worker, concurrency) {
   function resume () {
     if (!self.paused) return
     self.paused = false
-    for (var i = 0; i < self.concurrency; i++) {
+    for (; queueHead && _running < _concurrency;) {
       _running++
       release()
     }
@@ -96,7 +112,7 @@ function fastqueue (context, worker, concurrency) {
     current.callback = done || noop
     current.errorHandler = errorHandler
 
-    if (_running === self.concurrency || self.paused) {
+    if (_running >= _concurrency || self.paused) {
       if (queueTail) {
         queueTail.next = current
         queueTail = current
@@ -120,7 +136,7 @@ function fastqueue (context, worker, concurrency) {
     current.callback = done || noop
     current.errorHandler = errorHandler
 
-    if (_running === self.concurrency || self.paused) {
+    if (_running >= _concurrency || self.paused) {
       if (queueHead) {
         current.next = queueHead
         queueHead = current
@@ -140,7 +156,7 @@ function fastqueue (context, worker, concurrency) {
       cache.release(holder)
     }
     var next = queueHead
-    if (next) {
+    if (next && _running <= _concurrency) {
       if (!self.paused) {
         if (queueTail === queueHead) {
           queueTail = null
@@ -203,9 +219,9 @@ function Task () {
   }
 }
 
-function queueAsPromised (context, worker, concurrency) {
+function queueAsPromised (context, worker, _concurrency) {
   if (typeof context === 'function') {
-    concurrency = worker
+    _concurrency = worker
     worker = context
     context = null
   }
@@ -217,7 +233,7 @@ function queueAsPromised (context, worker, concurrency) {
       }, cb)
   }
 
-  var queue = fastqueue(context, asyncWrapper, concurrency)
+  var queue = fastqueue(context, asyncWrapper, _concurrency)
 
   var pushCb = queue.push
   var unshiftCb = queue.unshift
