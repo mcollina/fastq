@@ -93,6 +93,11 @@ function fastqueue (context, worker, _concurrency) {
   function resume () {
     if (!self.paused) return
     self.paused = false
+    if (queueHead === null) {
+      _running++
+      release()
+      return
+    }
     for (; queueHead && _running < _concurrency;) {
       _running++
       release()

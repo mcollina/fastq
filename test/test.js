@@ -624,3 +624,19 @@ test('unshift with worker throwing error', function (t) {
     t.match(err.message, /test error/, 'error message should be "test error"')
   })
 })
+
+test('pause/resume should trigger drain event', function (t) {
+  t.plan(1)
+
+  var queue = buildQueue(worker, 1)
+  queue.pause()
+  queue.drain = function () {
+    t.pass('drain should be called')
+  }
+
+  function worker (arg, cb) {
+    cb(null, true)
+  }
+
+  queue.resume()
+})
