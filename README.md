@@ -2,7 +2,6 @@
 
 ![ci][ci-url]
 [![npm version][npm-badge]][npm-url]
-[![Dependency Status][david-badge]][david-url]
 
 Fast, in memory work queue.
 
@@ -305,5 +304,3 @@ ISC
 [ci-url]: https://github.com/mcollina/fastq/workflows/ci/badge.svg
 [npm-badge]: https://badge.fury.io/js/fastq.svg
 [npm-url]: https://badge.fury.io/js/fastq
-[david-badge]: https://david-dm.org/mcollina/fastq.svg
-[david-url]: https://david-dm.org/mcollina/fastq
