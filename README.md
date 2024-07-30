@@ -280,22 +280,16 @@ Arguments:
 Add a task at the end of the queue. The returned `Promise`  will be fulfilled (rejected)
 when the task is completed successfully (unsuccessfully).
 
-This promise could be ignored as it will not lead to a `'unhandledRejection'`.
-
 <a name="unshiftPromise"></a>
 #### queue.unshift(task) => Promise
 
 Add a task at the beginning of the queue. The returned `Promise`  will be fulfilled (rejected)
 when the task is completed successfully (unsuccessfully).
 
-This promise could be ignored as it will not lead to a `'unhandledRejection'`.
-
 <a name="drained"></a>
 #### queue.drained() => Promise
 
 Wait for the queue to be drained. The returned `Promise` will be resolved when all tasks in the queue have been processed by a worker.
-
-This promise could be ignored as it will not lead to a `'unhandledRejection'`.
 
 ## License
 
