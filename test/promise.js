@@ -156,6 +156,64 @@ test('drained while idle should not call the drain function', async function (t)
   t.equal(drainCalled, false)
 })
 
+test('drained returns same promise until it is drained and new item is pushed', async function (t) {
+  const queue = buildQueue(worker, 1)
+  let resolveWorker
+
+  async function worker () {
+    return new Promise(resolve => {
+      resolveWorker = resolve
+    })
+  }
+
+  queue.push(1)
+  const drainedPromise1 = queue.drained()
+  const drainedPromise2 = queue.drained()
+
+  t.equal(drainedPromise1, drainedPromise2)
+
+  resolveWorker?.()
+  await Promise.all([drainedPromise1, drainedPromise2])
+
+  queue.push(3)
+  const drainedPromise3 = queue.drained()
+
+  t.notEqual(drainedPromise1, drainedPromise3)
+
+  const thenHandler = t.captureFn(() => {})
+  drainedPromise3.then(thenHandler)
+
+  await new Promise(resolve => {
+    setImmediate(resolve)
+  })
+
+  t.equal(thenHandler.calls.length, 0)
+})
+
+test('drained 14000+ times should not cause drain() to throw', async function (t) {
+  const queue = buildQueue(worker, 1)
+  let resolveWorker
+
+  async function worker (arg) {
+    return new Promise(resolve => {
+      resolveWorker = resolve
+    })
+  }
+
+  // the number needs to be large enough to break the stack size
+  // if the drained function keeps wrapping previousDrain() inside another drain()
+  for (let i = 0; i < 14000; i++) {
+    queue.push(1)
+    const drainedPromise = queue.drained()
+    resolveWorker?.()
+    await drainedPromise
+  }
+
+  t.doesNotThrow(async () => {
+    queue.drain()
+  })
+})
+
 test('set this', async function (t) {
   t.plan(1)
   const that = {}
