@@ -246,3 +246,46 @@ test('no unhandledRejection (unshift)', async function (t) {
   await immediate()
   process.removeListener('unhandledRejection', handleRejection)
 })
+
+test('drained should resolve after async tasks complete', async function (t) {
+  const logs = []
+
+  async function processTask () {
+    await new Promise(resolve => setTimeout(resolve, 0))
+    logs.push('processed')
+  }
+
+  const queue = buildQueue(processTask, 1)
+  queue.drain = () => logs.push('called drain')
+
+  queue.drained().then(() => logs.push('drained promise resolved'))
+
+  await Promise.all([
+    queue.push(),
+    queue.push(),
+    queue.push()
+  ])
+
+  t.deepEqual(logs, [
+    'processed',
+    'processed',
+    'processed',
+    'called drain',
+    'drained promise resolved'
+  ], 'events happened in correct order')
+})
+
+test('drained should handle undefined drain function', async function (t) {
+  const queue = buildQueue(worker, 1)
+
+  async function worker (arg) {
+    await sleep(10)
+    return arg
+  }
+
+  queue.drain = undefined
+  queue.push(1)
+  await queue.drained()
+
+  t.pass('drained resolved successfully with undefined drain')
+})
