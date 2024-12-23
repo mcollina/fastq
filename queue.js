@@ -289,7 +289,7 @@ function queueAsPromised (context, worker, _concurrency) {
 
   function drained () {
     var p = new Promise(function (resolve) {
-      setImmediate(() => {
+      process.nextTick(function () {
         if (queue.idle()) {
           resolve()
         } else {
