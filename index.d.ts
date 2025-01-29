@@ -20,6 +20,7 @@ declare namespace fastq {
     killAndDrain(): any
     error(handler: errorHandler<T>): void
     concurrency: number
+    readonly paused: boolean
     drain(): any
     empty: () => void
     saturated: () => void
