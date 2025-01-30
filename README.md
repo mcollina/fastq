@@ -234,6 +234,12 @@ Property that returns the number of concurrent tasks that could be executed in
 parallel. It can be altered at runtime.
 
 -------------------------------------------------------
+<a name="paused"></a>
+### queue.paused
+
+Property (Read-Only) that returns `true` when the queue is in a paused state.
+
+-------------------------------------------------------
 <a name="drain"></a>
 ### queue.drain
 

@@ -640,3 +640,14 @@ test('pause/resume should trigger drain event', function (t) {
 
   queue.resume()
 })
+
+test('paused flag', function (t) {
+  t.plan(2)
+
+  var queue = buildQueue(function (arg, cb) {
+    cb(null)
+  }, 1)
+  t.equal(queue.paused, false)
+  queue.pause()
+  t.equal(queue.paused, true)
+})
