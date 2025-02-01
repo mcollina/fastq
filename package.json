@@ -20,6 +20,11 @@
     "type": "git",
     "url": "git+https://github.com/mcollina/fastq.git"
   },
+  "files": [
+    "*.js",
+    "*.mjs",
+    "*.d.ts"
+  ],
   "keywords": [
     "fast",
     "queue",
