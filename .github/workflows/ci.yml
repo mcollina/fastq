@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['0.10', '0.12', 4.x, 6.x, 8.x]
+        node-version: ['0.10', '0.12', 4.x, 6.x, 8.x, 10.x, 12.x, 13.x, 14.x, 15.x, 16.x]
 
     steps:
       - uses: actions/checkout@v3
@@ -33,7 +33,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 13.x, 14.x, 15.x, 16.x, 18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
       - uses: actions/checkout@v3
