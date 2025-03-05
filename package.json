@@ -3,6 +3,8 @@
   "version": "1.19.1",
   "description": "Fast, in memory work queue",
   "main": "queue.js",
+  "browser": "queue.mjs",
+  "module": "queue.mjs",
   "scripts": {
     "lint": "standard --verbose | snazzy",
     "unit": "nyc --lines 100 --branches 100 --functions 100 --check-coverage --reporter=text tape test/test.js test/promise.js",
@@ -10,7 +12,8 @@
     "test:report": "npm run lint && npm run unit:report",
     "test": "npm run lint && npm run unit",
     "typescript": "tsc --project ./test/tsconfig.json",
-    "legacy": "tape test/test.js"
+    "legacy": "tape test/test.js",
+    "build": "rollup -c"
   },
   "pre-commit": [
     "test",
@@ -33,6 +36,8 @@
   },
   "homepage": "https://github.com/mcollina/fastq#readme",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
     "async": "^3.1.0",
     "neo-async": "^2.6.1",
     "nyc": "^17.0.0",
@@ -47,7 +52,8 @@
   },
   "standard": {
     "ignore": [
-      "example.mjs"
+      "example.mjs",
+      "queue.mjs"
     ]
   }
 }
