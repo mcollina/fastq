@@ -39,7 +39,7 @@
     "nyc": "^17.0.0",
     "pre-commit": "^1.2.2",
     "snazzy": "^9.0.0",
-    "standard": "^16.0.0",
+    "standard": "^17.1.2",
     "tape": "^5.0.0",
     "typescript": "^5.0.4"
   },
