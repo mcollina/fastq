@@ -22,10 +22,10 @@ function fastqueue (context, worker, _concurrency) {
   var errorHandler = null
 
   var self = {
-    push,
+    push: push,
     drain: noop,
     saturated: noop,
-    pause,
+    pause: pause,
     paused: false,
 
     get concurrency () {
@@ -44,16 +44,16 @@ function fastqueue (context, worker, _concurrency) {
       }
     },
 
-    running,
-    resume,
-    idle,
-    length,
-    getQueue,
-    unshift,
+    running: running,
+    resume: resume,
+    idle: idle,
+    length: length,
+    getQueue: getQueue,
+    unshift: unshift,
     empty: noop,
-    kill,
-    killAndDrain,
-    error
+    kill: kill,
+    killAndDrain: killAndDrain,
+    error: error
   }
 
   return self
