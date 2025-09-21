@@ -289,3 +289,185 @@ test('drained should handle undefined drain function', async function (t) {
 
   t.pass('drained resolved successfully with undefined drain')
 })
+
+test('kill() should reject pending promises', async function (t) {
+  t.plan(4)
+
+  const queue = buildQueue(worker, 1)
+
+  // Start one task to fill the concurrency
+  const runningPromise = queue.push('running')
+
+  // Queue several tasks that will be pending
+  const pendingPromise1 = queue.push('pending1')
+  queue.push('pending2') // These will be tested in future iterations
+  queue.push('pending3') // These will be tested in future iterations
+
+  // Verify tasks are queued
+  t.equal(queue.length(), 3, 'should have 3 queued tasks')
+
+  // Kill the queue
+  queue.kill()
+
+  // Verify queue is cleared
+  t.equal(queue.length(), 0, 'queue should be empty after kill')
+
+  // The running task should complete normally
+  try {
+    const result = await runningPromise
+    t.equal(result, 'running-result', 'running task should complete')
+  } catch (err) {
+    t.fail('running task should not be rejected')
+  }
+
+  // Pending promises should be rejected
+  try {
+    await pendingPromise1
+    t.fail('pending promise 1 should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error, 'pending promise 1 should be rejected with error')
+  }
+
+  async function worker (arg) {
+    if (arg === 'running') {
+      await sleep(50) // Simulate some work
+      return 'running-result'
+    }
+    return `${arg}-result`
+  }
+})
+
+test('killAndDrain() should reject pending promises', async function (t) {
+  t.plan(4)
+
+  const queue = buildQueue(worker, 1)
+
+  // Start one task to fill the concurrency
+  const runningPromise = queue.push('running')
+
+  // Queue several tasks that will be pending
+  const pendingPromise1 = queue.push('pending1')
+  queue.push('pending2') // Will be tested in future iterations
+
+  // Verify tasks are queued
+  t.equal(queue.length(), 2, 'should have 2 queued tasks')
+
+  // Kill and drain the queue
+  queue.killAndDrain()
+
+  // Verify queue is cleared
+  t.equal(queue.length(), 0, 'queue should be empty after killAndDrain')
+
+  // The running task should complete normally
+  try {
+    const result = await runningPromise
+    t.equal(result, 'running-result', 'running task should complete')
+  } catch (err) {
+    t.fail('running task should not be rejected')
+  }
+
+  // Pending promises should be rejected
+  try {
+    await pendingPromise1
+    t.fail('pending promise 1 should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error, 'pending promise 1 should be rejected with error')
+  }
+
+  async function worker (arg) {
+    if (arg === 'running') {
+      await sleep(50) // Simulate some work
+      return 'running-result'
+    }
+    return `${arg}-result`
+  }
+})
+
+test('unshift() with kill() should also reject promises', async function (t) {
+  t.plan(4)
+
+  const queue = buildQueue(worker, 1)
+
+  // Start one task to fill the concurrency
+  const runningPromise = queue.push('running')
+
+  // Unshift several tasks that will be pending
+  const pendingPromise1 = queue.unshift('pending1')
+
+  // Verify tasks are queued
+  t.equal(queue.length(), 1, 'should have 1 queued task')
+
+  // Kill the queue
+  queue.kill()
+
+  // Verify queue is cleared
+  t.equal(queue.length(), 0, 'queue should be empty after kill')
+
+  // The running task should complete normally
+  try {
+    const result = await runningPromise
+    t.equal(result, 'running-result', 'running task should complete')
+  } catch (err) {
+    t.fail('running task should not be rejected')
+  }
+
+  // Pending promises should be rejected
+  try {
+    await pendingPromise1
+    t.fail('pending promise 1 should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error, 'pending promise 1 should be rejected with error')
+  }
+
+  async function worker (arg) {
+    if (arg === 'running') {
+      await sleep(50) // Simulate some work
+      return 'running-result'
+    }
+    return `${arg}-result`
+  }
+})
+
+test('normal promise resolution should work correctly', async function (t) {
+  t.plan(1)
+
+  const queue = buildQueue(worker, 2)
+
+  // Test normal promise resolution for both push and unshift
+  const results = await Promise.all([
+    queue.push('task1'),
+    queue.unshift('task2'),
+    queue.push('task3')
+  ])
+
+  t.deepEqual(results, ['task1-result', 'task2-result', 'task3-result'], 'all promises should resolve with correct values')
+
+  async function worker (arg) {
+    return `${arg}-result`
+  }
+})
+
+test('promise resolution with errors should clean up correctly', async function (t) {
+  t.plan(2)
+
+  const queue = buildQueue(worker, 1)
+
+  // Test that error handling also properly removes from pendingPromises
+  try {
+    await queue.push('error')
+    t.fail('should have thrown an error')
+  } catch (err) {
+    t.equal(err.message, 'test error', 'should throw the expected error')
+  }
+
+  // Test that normal execution still works after error
+  const result = await queue.push('success')
+  t.equal(result, 'success-result', 'should work normally after error')
+
+  async function worker (arg) {
+    if (arg === 'error') {
+      throw new Error('test error')
+    }
+    return `${arg}-result`
+  }
+})
