@@ -18,8 +18,6 @@ If you need zero-overhead series function call, check out
 [fastseries](http://npm.im/fastseries). For zero-overhead parallel
 function call, check out [fastparallel](http://npm.im/fastparallel).
 
-[![js-standard-style](https://raw.githubusercontent.com/feross/standard/master/badge.png)](https://github.com/feross/standard)
-
   * <a href="#install">Installation</a>
   * <a href="#usage">Usage</a>
   * <a href="#api">API</a>

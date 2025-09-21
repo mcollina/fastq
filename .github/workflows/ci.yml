@@ -49,9 +49,14 @@ jobs:
         run: |
           npm install
 
-      - name: Run tests
+      - name: Run linting (Node 20+)
+        if: ${{ matrix.node-version == '20.x' || matrix.node-version == '22.x' }}
         run: |
-          npm run test
+          npm run lint
+
+      - name: Run unit tests
+        run: |
+          npm run unit
 
   types:
     runs-on: ubuntu-latest
