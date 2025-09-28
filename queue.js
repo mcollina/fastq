@@ -53,6 +53,8 @@ function fastqueue (context, worker, _concurrency) {
     empty: noop,
     kill: kill,
     killAndDrain: killAndDrain,
+    abort: abort,
+    abortAndDrain: abortAndDrain,
     error: error
   }
 
@@ -193,6 +195,39 @@ function fastqueue (context, worker, _concurrency) {
     self.drain = noop
   }
 
+  function abort () {
+    // Call all pending callbacks with an abort error
+    var current = queueHead
+    while (current) {
+      if (current.callback && current.callback !== noop) {
+        current.callback(new Error('fastq aborted'))
+      }
+      current = current.next
+    }
+
+    // Then clear the queue
+    queueHead = null
+    queueTail = null
+    self.drain = noop
+  }
+
+  function abortAndDrain () {
+    // Call all pending callbacks with an abort error
+    var current = queueHead
+    while (current) {
+      if (current.callback && current.callback !== noop) {
+        current.callback(new Error('fastq aborted'))
+      }
+      current = current.next
+    }
+
+    // Then clear the queue and call drain
+    queueHead = null
+    queueTail = null
+    self.drain()
+    self.drain = noop
+  }
+
   function error (handler) {
     errorHandler = handler
   }
@@ -239,12 +274,9 @@ function queueAsPromised (context, worker, _concurrency) {
   }
 
   var queue = fastqueue(context, asyncWrapper, _concurrency)
-  var pendingPromises = []
 
   var pushCb = queue.push
   var unshiftCb = queue.unshift
-  var killCb = queue.kill
-  var killAndDrainCb = queue.killAndDrain
 
   queue.push = push
   queue.unshift = unshift
@@ -255,20 +287,8 @@ function queueAsPromised (context, worker, _concurrency) {
   return queue
 
   function push (value) {
-    var promiseCallbacks = {}
-    var p = new Promise(function (resolve, reject) {
-      promiseCallbacks.resolve = resolve
-      promiseCallbacks.reject = reject
-      promiseCallbacks.value = value
-
+    return new Promise(function (resolve, reject) {
       pushCb(value, function (err, result) {
-        // Remove from pending promises when settled
-        var index = pendingPromises.indexOf(promiseCallbacks)
-        /* istanbul ignore else: defensive check - index should always be found */
-        if (index !== -1) {
-          pendingPromises.splice(index, 1)
-        }
-
         if (err) {
           reject(err)
           return
@@ -276,33 +296,11 @@ function queueAsPromised (context, worker, _concurrency) {
         resolve(result)
       })
     })
-
-    // Track this promise for potential kill() calls
-    pendingPromises.push(promiseCallbacks)
-
-    // Let's fork the promise chain to
-    // make the error bubble up to the user but
-    // not lead to a unhandledRejection
-    p.catch(noop)
-
-    return p
   }
 
   function unshift (value) {
-    var promiseCallbacks = {}
-    var p = new Promise(function (resolve, reject) {
-      promiseCallbacks.resolve = resolve
-      promiseCallbacks.reject = reject
-      promiseCallbacks.value = value
-
+    return new Promise(function (resolve, reject) {
       unshiftCb(value, function (err, result) {
-        // Remove from pending promises when settled
-        var index = pendingPromises.indexOf(promiseCallbacks)
-        /* istanbul ignore else: defensive check - index should always be found */
-        if (index !== -1) {
-          pendingPromises.splice(index, 1)
-        }
-
         if (err) {
           reject(err)
           return
@@ -310,16 +308,6 @@ function queueAsPromised (context, worker, _concurrency) {
         resolve(result)
       })
     })
-
-    // Track this promise for potential kill() calls
-    pendingPromises.push(promiseCallbacks)
-
-    // Let's fork the promise chain to
-    // make the error bubble up to the user but
-    // not lead to a unhandledRejection
-    p.catch(noop)
-
-    return p
   }
 
   function drained () {
@@ -342,49 +330,13 @@ function queueAsPromised (context, worker, _concurrency) {
   }
 
   function kill () {
-    // Get the current queued tasks before killing
-    var queuedTasks = queue.getQueue()
-
-    // Call original kill first
-    killCb()
-
-    // Reject promises only for tasks that were queued (not running)
-    var i = pendingPromises.length
-    while (i--) {
-      var promiseCallbacks = pendingPromises[i]
-      // Check if this promise's value matches any queued task
-      var wasQueued = queuedTasks.some(function (queuedValue) {
-        return queuedValue === promiseCallbacks.value
-      })
-
-      if (wasQueued) {
-        pendingPromises.splice(i, 1)
-        promiseCallbacks.reject(new Error('fastq aborted'))
-      }
-    }
+    // Use abort() instead of kill() to ensure callbacks are called with errors
+    queue.abort()
   }
 
   function killAndDrain () {
-    // Get the current queued tasks before killing
-    var queuedTasks = queue.getQueue()
-
-    // Call original killAndDrain first
-    killAndDrainCb()
-
-    // Reject promises only for tasks that were queued (not running)
-    var i = pendingPromises.length
-    while (i--) {
-      var promiseCallbacks = pendingPromises[i]
-      // Check if this promise's value matches any queued task
-      var wasQueued = queuedTasks.some(function (queuedValue) {
-        return queuedValue === promiseCallbacks.value
-      })
-
-      if (wasQueued) {
-        pendingPromises.splice(i, 1)
-        promiseCallbacks.reject(new Error('fastq aborted'))
-      }
-    }
+    // Use abortAndDrain() instead of killAndDrain() to ensure callbacks are called with errors
+    queue.abortAndDrain()
   }
 }
 

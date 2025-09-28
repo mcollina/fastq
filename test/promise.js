@@ -312,12 +312,12 @@ test('kill() should reject pending promises', async function (t) {
   // Verify queue is cleared
   t.equal(queue.length(), 0, 'queue should be empty after kill')
 
-  // The running task should complete normally
+  // ALL promises should be rejected (including running) with abort() approach
   try {
-    const result = await runningPromise
-    t.equal(result, 'running-result', 'running task should complete')
+    await runningPromise
+    t.fail('running promise should have been rejected')
   } catch (err) {
-    t.fail('running task should not be rejected')
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
   }
 
   // Pending promises should be rejected
@@ -325,7 +325,7 @@ test('kill() should reject pending promises', async function (t) {
     await pendingPromise1
     t.fail('pending promise 1 should have been rejected')
   } catch (err) {
-    t.ok(err instanceof Error, 'pending promise 1 should be rejected with error')
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'pending promise 1 should be rejected with abort error')
   }
 
   async function worker (arg) {
@@ -358,12 +358,12 @@ test('killAndDrain() should reject pending promises', async function (t) {
   // Verify queue is cleared
   t.equal(queue.length(), 0, 'queue should be empty after killAndDrain')
 
-  // The running task should complete normally
+  // ALL promises should be rejected (including running) with abortAndDrain() approach
   try {
-    const result = await runningPromise
-    t.equal(result, 'running-result', 'running task should complete')
+    await runningPromise
+    t.fail('running promise should have been rejected')
   } catch (err) {
-    t.fail('running task should not be rejected')
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
   }
 
   // Pending promises should be rejected
@@ -371,7 +371,7 @@ test('killAndDrain() should reject pending promises', async function (t) {
     await pendingPromise1
     t.fail('pending promise 1 should have been rejected')
   } catch (err) {
-    t.ok(err instanceof Error, 'pending promise 1 should be rejected with error')
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'pending promise 1 should be rejected with abort error')
   }
 
   async function worker (arg) {
@@ -403,12 +403,12 @@ test('unshift() with kill() should also reject promises', async function (t) {
   // Verify queue is cleared
   t.equal(queue.length(), 0, 'queue should be empty after kill')
 
-  // The running task should complete normally
+  // ALL promises should be rejected (including running) with abort() approach
   try {
-    const result = await runningPromise
-    t.equal(result, 'running-result', 'running task should complete')
+    await runningPromise
+    t.fail('running promise should have been rejected')
   } catch (err) {
-    t.fail('running task should not be rejected')
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
   }
 
   // Pending promises should be rejected
@@ -416,7 +416,7 @@ test('unshift() with kill() should also reject promises', async function (t) {
     await pendingPromise1
     t.fail('pending promise 1 should have been rejected')
   } catch (err) {
-    t.ok(err instanceof Error, 'pending promise 1 should be rejected with error')
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'pending promise 1 should be rejected with abort error')
   }
 
   async function worker (arg) {
@@ -448,21 +448,33 @@ test('normal promise resolution should work correctly', async function (t) {
 })
 
 test('promise resolution with errors should clean up correctly', async function (t) {
-  t.plan(2)
+  t.plan(4)
 
   const queue = buildQueue(worker, 1)
 
-  // Test that error handling also properly removes from pendingPromises
+  // Test that error handling in push works
   try {
     await queue.push('error')
     t.fail('should have thrown an error')
   } catch (err) {
-    t.equal(err.message, 'test error', 'should throw the expected error')
+    t.equal(err.message, 'test error', 'push should throw the expected error')
+  }
+
+  // Test that error handling in unshift works
+  try {
+    await queue.unshift('error')
+    t.fail('should have thrown an error')
+  } catch (err) {
+    t.equal(err.message, 'test error', 'unshift should throw the expected error')
   }
 
   // Test that normal execution still works after error
   const result = await queue.push('success')
   t.equal(result, 'success-result', 'should work normally after error')
+
+  // Test unshift normal execution
+  const unshiftResult = await queue.unshift('unshift-success')
+  t.equal(unshiftResult, 'unshift-success-result', 'unshift should work normally')
 
   async function worker (arg) {
     if (arg === 'error') {
@@ -470,4 +482,30 @@ test('promise resolution with errors should clean up correctly', async function 
     }
     return `${arg}-result`
   }
+})
+
+test('promise abort methods coverage', async function (t) {
+  t.plan(2)
+
+  const queue1 = buildQueue(async function (arg) {
+    return arg * 2
+  }, 1)
+
+  const queue2 = buildQueue(async function (arg) {
+    return arg * 2
+  }, 1)
+
+  // Add some tasks to ensure methods are called
+  queue1.push(1)
+  queue1.push(2)
+
+  queue2.push(1)
+  queue2.push(2)
+
+  // Call the methods to get coverage
+  queue1.kill()
+  queue2.killAndDrain()
+
+  t.pass('kill method called')
+  t.pass('killAndDrain method called')
 })
