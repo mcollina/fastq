@@ -218,6 +218,18 @@ function.
 Same than `kill` but the `drain` function will be called before reset to empty.
 
 -------------------------------------------------------
+<a name="abort"></a>
+### queue.abort()
+
+Calls all pending task callbacks with an `Error('fastq aborted')` and removes all tasks from the queue. Unlike `kill()`, this ensures that promises from the promise API are properly rejected rather than left unsettled.
+
+-------------------------------------------------------
+<a name="abortAndDrain"></a>
+### queue.abortAndDrain()
+
+Same as `abort()` but the `drain` function will be called before reset to empty.
+
+-------------------------------------------------------
 <a name="error"></a>
 ### queue.error(handler)
 

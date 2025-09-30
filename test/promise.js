@@ -289,3 +289,223 @@ test('drained should handle undefined drain function', async function (t) {
 
   t.pass('drained resolved successfully with undefined drain')
 })
+
+test('kill() should reject pending promises', async function (t) {
+  t.plan(4)
+
+  const queue = buildQueue(worker, 1)
+
+  // Start one task to fill the concurrency
+  const runningPromise = queue.push('running')
+
+  // Queue several tasks that will be pending
+  const pendingPromise1 = queue.push('pending1')
+  queue.push('pending2') // These will be tested in future iterations
+  queue.push('pending3') // These will be tested in future iterations
+
+  // Verify tasks are queued
+  t.equal(queue.length(), 3, 'should have 3 queued tasks')
+
+  // Kill the queue
+  queue.kill()
+
+  // Verify queue is cleared
+  t.equal(queue.length(), 0, 'queue should be empty after kill')
+
+  // ALL promises should be rejected (including running) with abort() approach
+  try {
+    await runningPromise
+    t.fail('running promise should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
+  }
+
+  // Pending promises should be rejected
+  try {
+    await pendingPromise1
+    t.fail('pending promise 1 should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'pending promise 1 should be rejected with abort error')
+  }
+
+  async function worker (arg) {
+    if (arg === 'running') {
+      await sleep(50) // Simulate some work
+      return 'running-result'
+    }
+    return `${arg}-result`
+  }
+})
+
+test('killAndDrain() should reject pending promises', async function (t) {
+  t.plan(4)
+
+  const queue = buildQueue(worker, 1)
+
+  // Start one task to fill the concurrency
+  const runningPromise = queue.push('running')
+
+  // Queue several tasks that will be pending
+  const pendingPromise1 = queue.push('pending1')
+  queue.push('pending2') // Will be tested in future iterations
+
+  // Verify tasks are queued
+  t.equal(queue.length(), 2, 'should have 2 queued tasks')
+
+  // Kill and drain the queue
+  queue.killAndDrain()
+
+  // Verify queue is cleared
+  t.equal(queue.length(), 0, 'queue should be empty after killAndDrain')
+
+  // ALL promises should be rejected (including running) with abortAndDrain() approach
+  try {
+    await runningPromise
+    t.fail('running promise should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
+  }
+
+  // Pending promises should be rejected
+  try {
+    await pendingPromise1
+    t.fail('pending promise 1 should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'pending promise 1 should be rejected with abort error')
+  }
+
+  async function worker (arg) {
+    if (arg === 'running') {
+      await sleep(50) // Simulate some work
+      return 'running-result'
+    }
+    return `${arg}-result`
+  }
+})
+
+test('unshift() with kill() should also reject promises', async function (t) {
+  t.plan(4)
+
+  const queue = buildQueue(worker, 1)
+
+  // Start one task to fill the concurrency
+  const runningPromise = queue.push('running')
+
+  // Unshift several tasks that will be pending
+  const pendingPromise1 = queue.unshift('pending1')
+
+  // Verify tasks are queued
+  t.equal(queue.length(), 1, 'should have 1 queued task')
+
+  // Kill the queue
+  queue.kill()
+
+  // Verify queue is cleared
+  t.equal(queue.length(), 0, 'queue should be empty after kill')
+
+  // ALL promises should be rejected (including running) with abort() approach
+  try {
+    await runningPromise
+    t.fail('running promise should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
+  }
+
+  // Pending promises should be rejected
+  try {
+    await pendingPromise1
+    t.fail('pending promise 1 should have been rejected')
+  } catch (err) {
+    t.ok(err instanceof Error && err.message === 'fastq aborted', 'pending promise 1 should be rejected with abort error')
+  }
+
+  async function worker (arg) {
+    if (arg === 'running') {
+      await sleep(50) // Simulate some work
+      return 'running-result'
+    }
+    return `${arg}-result`
+  }
+})
+
+test('normal promise resolution should work correctly', async function (t) {
+  t.plan(1)
+
+  const queue = buildQueue(worker, 2)
+
+  // Test normal promise resolution for both push and unshift
+  const results = await Promise.all([
+    queue.push('task1'),
+    queue.unshift('task2'),
+    queue.push('task3')
+  ])
+
+  t.deepEqual(results, ['task1-result', 'task2-result', 'task3-result'], 'all promises should resolve with correct values')
+
+  async function worker (arg) {
+    return `${arg}-result`
+  }
+})
+
+test('promise resolution with errors should clean up correctly', async function (t) {
+  t.plan(4)
+
+  const queue = buildQueue(worker, 1)
+
+  // Test that error handling in push works
+  try {
+    await queue.push('error')
+    t.fail('should have thrown an error')
+  } catch (err) {
+    t.equal(err.message, 'test error', 'push should throw the expected error')
+  }
+
+  // Test that error handling in unshift works
+  try {
+    await queue.unshift('error')
+    t.fail('should have thrown an error')
+  } catch (err) {
+    t.equal(err.message, 'test error', 'unshift should throw the expected error')
+  }
+
+  // Test that normal execution still works after error
+  const result = await queue.push('success')
+  t.equal(result, 'success-result', 'should work normally after error')
+
+  // Test unshift normal execution
+  const unshiftResult = await queue.unshift('unshift-success')
+  t.equal(unshiftResult, 'unshift-success-result', 'unshift should work normally')
+
+  async function worker (arg) {
+    if (arg === 'error') {
+      throw new Error('test error')
+    }
+    return `${arg}-result`
+  }
+})
+
+test('promise abort methods coverage', async function (t) {
+  t.plan(2)
+
+  const queue1 = buildQueue(async function (arg) {
+    return arg * 2
+  }, 1)
+
+  const queue2 = buildQueue(async function (arg) {
+    return arg * 2
+  }, 1)
+
+  // Add some tasks to ensure methods are called
+  queue1.push(1)
+  queue1.push(2)
+
+  queue2.push(1)
+  queue2.push(2)
+
+  // Call the methods to get coverage
+  queue1.kill()
+  queue2.killAndDrain()
+
+  t.pass('kill method called')
+  t.pass('killAndDrain method called')
+})

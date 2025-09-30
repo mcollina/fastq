@@ -53,6 +53,8 @@ function fastqueue (context, worker, _concurrency) {
     empty: noop,
     kill: kill,
     killAndDrain: killAndDrain,
+    abort: abort,
+    abortAndDrain: abortAndDrain,
     error: error
   }
 
@@ -193,6 +195,39 @@ function fastqueue (context, worker, _concurrency) {
     self.drain = noop
   }
 
+  function abort () {
+    // Call all pending callbacks with an abort error
+    var current = queueHead
+    while (current) {
+      if (current.callback && current.callback !== noop) {
+        current.callback(new Error('fastq aborted'))
+      }
+      current = current.next
+    }
+
+    // Then clear the queue
+    queueHead = null
+    queueTail = null
+    self.drain = noop
+  }
+
+  function abortAndDrain () {
+    // Call all pending callbacks with an abort error
+    var current = queueHead
+    while (current) {
+      if (current.callback && current.callback !== noop) {
+        current.callback(new Error('fastq aborted'))
+      }
+      current = current.next
+    }
+
+    // Then clear the queue and call drain
+    queueHead = null
+    queueTail = null
+    self.drain()
+    self.drain = noop
+  }
+
   function error (handler) {
     errorHandler = handler
   }
@@ -246,11 +281,13 @@ function queueAsPromised (context, worker, _concurrency) {
   queue.push = push
   queue.unshift = unshift
   queue.drained = drained
+  queue.kill = kill
+  queue.killAndDrain = killAndDrain
 
   return queue
 
   function push (value) {
-    var p = new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
       pushCb(value, function (err, result) {
         if (err) {
           reject(err)
@@ -259,17 +296,10 @@ function queueAsPromised (context, worker, _concurrency) {
         resolve(result)
       })
     })
-
-    // Let's fork the promise chain to
-    // make the error bubble up to the user but
-    // not lead to a unhandledRejection
-    p.catch(noop)
-
-    return p
   }
 
   function unshift (value) {
-    var p = new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
       unshiftCb(value, function (err, result) {
         if (err) {
           reject(err)
@@ -278,13 +308,6 @@ function queueAsPromised (context, worker, _concurrency) {
         resolve(result)
       })
     })
-
-    // Let's fork the promise chain to
-    // make the error bubble up to the user but
-    // not lead to a unhandledRejection
-    p.catch(noop)
-
-    return p
   }
 
   function drained () {
@@ -304,6 +327,16 @@ function queueAsPromised (context, worker, _concurrency) {
     })
 
     return p
+  }
+
+  function kill () {
+    // Use abort() instead of kill() to ensure callbacks are called with errors
+    queue.abort()
+  }
+
+  function killAndDrain () {
+    // Use abortAndDrain() instead of killAndDrain() to ensure callbacks are called with errors
+    queue.abortAndDrain()
   }
 }
 
