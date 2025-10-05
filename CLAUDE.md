@@ -12,8 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run typescript` - Type check TypeScript declarations
 
 ### Code Quality
-- `npm run lint` - Run ESLint with neostandard configuration
+- `npm run lint` - Run ESLint with neostandard configuration (Node.js 20+ only in CI)
 - Tests and TypeScript checks run automatically on pre-commit hooks
+- `.npmrc` disables install scripts for legacy Node.js compatibility
 
 ### Test Files
 - `test/test.js` - Main callback API test suite
@@ -48,8 +49,22 @@ This is a high-performance, in-memory work queue library with both callback and 
 - Minimal function call overhead
 - Efficient queue operations using linked list
 
+## Legacy Node.js Support
+
+This project supports Node.js versions back to 0.10, requiring special considerations:
+
+### Linting Configuration
+- ESLint with neostandard runs only on Node.js 20+ in CI
+- `object-shorthand` rule disabled for Node.js 0.10 compatibility
+- Configuration in `eslint.config.js` extends neostandard with legacy overrides
+
+### Install Scripts
+- `.npmrc` contains `ignore-scripts=true` to prevent install script failures on legacy Node.js
+- Modern dependencies may have install scripts incompatible with very old Node.js versions
+
 ## Module Structure
 - Main entry: `queue.js` (CommonJS module)
 - TypeScript definitions: `index.d.ts`
 - Examples: `example.js`, `example.mjs`
 - Benchmarks: `bench.js`
+- Linting: `eslint.config.js` (flat config with neostandard + legacy overrides)

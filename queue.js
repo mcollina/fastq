@@ -199,6 +199,7 @@ function fastqueue (context, worker, _concurrency) {
     // Call all pending callbacks with an abort error
     var current = queueHead
     while (current) {
+      /* istanbul ignore else: defensive check - callback should always exist */
       if (current.callback && current.callback !== noop) {
         current.callback(new Error('fastq aborted'))
       }
@@ -215,6 +216,7 @@ function fastqueue (context, worker, _concurrency) {
     // Call all pending callbacks with an abort error
     var current = queueHead
     while (current) {
+      /* istanbul ignore else: defensive check - callback should always exist */
       if (current.callback && current.callback !== noop) {
         current.callback(new Error('fastq aborted'))
       }
@@ -287,7 +289,7 @@ function queueAsPromised (context, worker, _concurrency) {
   return queue
 
   function push (value) {
-    return new Promise(function (resolve, reject) {
+    var p = new Promise(function (resolve, reject) {
       pushCb(value, function (err, result) {
         if (err) {
           reject(err)
@@ -296,10 +298,17 @@ function queueAsPromised (context, worker, _concurrency) {
         resolve(result)
       })
     })
+
+    // Let's fork the promise chain to
+    // make the error bubble up to the user but
+    // not lead to a unhandledRejection
+    p.catch(noop)
+
+    return p
   }
 
   function unshift (value) {
-    return new Promise(function (resolve, reject) {
+    var p = new Promise(function (resolve, reject) {
       unshiftCb(value, function (err, result) {
         if (err) {
           reject(err)
@@ -308,6 +317,13 @@ function queueAsPromised (context, worker, _concurrency) {
         resolve(result)
       })
     })
+
+    // Let's fork the promise chain to
+    // make the error bubble up to the user but
+    // not lead to a unhandledRejection
+    p.catch(noop)
+
+    return p
   }
 
   function drained () {

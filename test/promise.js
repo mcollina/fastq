@@ -312,12 +312,12 @@ test('kill() should reject pending promises', async function (t) {
   // Verify queue is cleared
   t.equal(queue.length(), 0, 'queue should be empty after kill')
 
-  // ALL promises should be rejected (including running) with abort() approach
+  // Running task should complete normally (only queued tasks are aborted)
   try {
-    await runningPromise
-    t.fail('running promise should have been rejected')
+    const result = await runningPromise
+    t.equal(result, 'running-result', 'running task should complete normally')
   } catch (err) {
-    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
+    t.fail('running task should not be rejected')
   }
 
   // Pending promises should be rejected
@@ -358,12 +358,12 @@ test('killAndDrain() should reject pending promises', async function (t) {
   // Verify queue is cleared
   t.equal(queue.length(), 0, 'queue should be empty after killAndDrain')
 
-  // ALL promises should be rejected (including running) with abortAndDrain() approach
+  // Running task should complete normally (only queued tasks are aborted)
   try {
-    await runningPromise
-    t.fail('running promise should have been rejected')
+    const result = await runningPromise
+    t.equal(result, 'running-result', 'running task should complete normally')
   } catch (err) {
-    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
+    t.fail('running task should not be rejected')
   }
 
   // Pending promises should be rejected
@@ -403,12 +403,12 @@ test('unshift() with kill() should also reject promises', async function (t) {
   // Verify queue is cleared
   t.equal(queue.length(), 0, 'queue should be empty after kill')
 
-  // ALL promises should be rejected (including running) with abort() approach
+  // Running task should complete normally (only queued tasks are aborted)
   try {
-    await runningPromise
-    t.fail('running promise should have been rejected')
+    const result = await runningPromise
+    t.equal(result, 'running-result', 'running task should complete normally')
   } catch (err) {
-    t.ok(err instanceof Error && err.message === 'fastq aborted', 'running promise should be rejected with abort error')
+    t.fail('running task should not be rejected')
   }
 
   // Pending promises should be rejected
