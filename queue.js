@@ -5,7 +5,7 @@
 var reusify = require('reusify')
 
 function fastqueue (context, worker, _concurrency) {
-  if (typeof context === 'function') {
+  if (typeof context === 'function' && typeof worker !== 'function') {
     _concurrency = worker
     worker = context
     context = null
@@ -225,7 +225,7 @@ function Task () {
 }
 
 function queueAsPromised (context, worker, _concurrency) {
-  if (typeof context === 'function') {
+  if (typeof context === 'function' && typeof worker !== 'function') {
     _concurrency = worker
     worker = context
     context = null
