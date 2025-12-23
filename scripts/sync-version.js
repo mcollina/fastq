@@ -16,10 +16,3 @@ if (passedVersion) {
     fs.writeFileSync(path.resolve('./package.json'), JSON.stringify(packageJson, null, 2) + '\n', { encoding: 'utf-8' })
   }
 }
-
-const metaContent = `'use strict'
-
-module.exports = { version: '${version}' }
-`
-
-fs.writeFileSync(path.resolve('./lib/meta.js'), metaContent, { encoding: 'utf-8' })
