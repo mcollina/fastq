@@ -8,15 +8,15 @@ jobs:
 
     strategy:
       matrix:
-        node-version: ['0.10', '0.12', 4.x, 6.x, 8.x, 10.x, 12.x, 13.x, 14.x, 15.x, 16.x]
+        node-version: ['0.10', '0.12', 4.x, 6.x, 8.x, 10.x, 12.x, 13.x, 14.x, 15.x, 16.x, 18.x, 20.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -33,15 +33,15 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [lts/-1, lts/*, current]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -50,7 +50,6 @@ jobs:
           npm install
 
       - name: Run linting (Node 20+)
-        if: ${{ matrix.node-version == '20.x' || matrix.node-version == '22.x' }}
         run: |
           npm run lint
 
@@ -62,14 +61,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: 16
+          node-version: current
 
       - name: Install
         run: |
