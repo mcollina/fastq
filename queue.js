@@ -210,6 +210,7 @@ function fastqueue (context, worker, _concurrency) {
       current.value = null
       current.callback = noop
       current.errorHandler = null
+      current.next = null
 
       // Call error handler if present
       if (errorHandler) {
@@ -219,8 +220,9 @@ function fastqueue (context, worker, _concurrency) {
       // Call callback with error
       callback.call(context, new Error('abort'))
 
-      // Release the task back to the pool
-      current.release(current)
+      // This task was queued, so return it to the pool without updating
+      // the running worker count.
+      cache.release(current)
 
       current = next
     }
