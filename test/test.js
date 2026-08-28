@@ -696,6 +696,81 @@ test('abort', function (t) {
   }
 })
 
+test('abort preserves running count and concurrency', function (t) {
+  t.plan(6)
+
+  var started = []
+  var finish = []
+  var queue = buildQueue(worker, 1)
+
+  queue.push(1)
+  queue.push(2)
+  queue.abort()
+
+  t.equal(queue.running(), 1, 'running task is preserved')
+
+  queue.push(3)
+  t.deepEqual(started, [1], 'new task does not exceed concurrency')
+
+  finish.shift()()
+
+  t.deepEqual(started, [1, 3], 'new task starts after the running task')
+  t.equal(queue.running(), 1, 'replacement task is counted')
+
+  finish.shift()()
+
+  t.equal(queue.running(), 0, 'running returns to zero')
+  t.ok(queue.idle(), 'queue is idle')
+
+  function worker (task, cb) {
+    started.push(task)
+    finish.push(function () {
+      cb(null, task)
+    })
+  }
+})
+
+test('abort callbacks can safely add tasks', function (t) {
+  t.plan(8)
+
+  var expected = ['active', 'new-1-a', 'new-1-b', 'new-2-a', 'new-2-b']
+  var started = []
+  var finish = []
+  var queue = buildQueue(worker, 1)
+
+  queue.push('active')
+  queue.push('aborted-1', requeue('1'))
+  queue.push('aborted-2', requeue('2'))
+  queue.abort()
+
+  t.equal(queue.running(), 1, 'running task is preserved')
+  t.equal(queue.length(), 4, 'tasks added by callbacks remain queued')
+  t.deepEqual(started, ['active'], 'added tasks wait for the running task')
+
+  for (var i = 0; i < expected.length; i++) {
+    finish.shift()()
+  }
+
+  t.deepEqual(started, expected, 'added tasks are processed once in order')
+  t.equal(queue.running(), 0, 'running returns to zero')
+  t.ok(queue.idle(), 'queue is idle')
+
+  function requeue (suffix) {
+    return function (err) {
+      t.equal(err.message, 'abort', 'callback receives abort error')
+      queue.push('new-' + suffix + '-a')
+      queue.push('new-' + suffix + '-b')
+    }
+  }
+
+  function worker (task, cb) {
+    started.push(task)
+    finish.push(function () {
+      cb(null, task)
+    })
+  }
+})
+
 test('abort with error handler', function (t) {
   t.plan(7)
 

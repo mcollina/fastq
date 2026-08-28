@@ -290,6 +290,37 @@ test('drained should handle undefined drain function', async function (t) {
   t.pass('drained resolved successfully with undefined drain')
 })
 
+test('drained waits for running tasks after abort', async function (t) {
+  let finish
+  let didDrain = false
+
+  const queue = buildQueue(function () {
+    return new Promise(function (resolve) {
+      finish = resolve
+    })
+  }, 1)
+
+  const running = queue.push(1)
+  queue.push(2)
+  queue.abort()
+
+  const drained = queue.drained().then(function () {
+    didDrain = true
+  })
+
+  await immediate()
+
+  t.equal(queue.running(), 1, 'running task is preserved')
+  t.equal(didDrain, false, 'queue does not drain while work is running')
+
+  finish()
+  await running
+  await drained
+
+  t.equal(didDrain, true, 'queue drains after running work completes')
+  t.equal(queue.running(), 0, 'running returns to zero')
+})
+
 test('abort rejects all pending promises', async function (t) {
   const queue = buildQueue(worker, 1)
   const promises = []
