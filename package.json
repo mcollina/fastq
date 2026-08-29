@@ -1,6 +1,6 @@
 {
   "name": "fastq",
-  "version": "1.20.2",
+  "version": "1.20.3",
   "description": "Fast, in memory work queue",
   "main": "queue.js",
   "type": "commonjs",
