@@ -1,3 +1,6 @@
 scripts
+test
+bench.js
 CLAUDE.md
 .github
+eslint.config.js
