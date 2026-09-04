@@ -4,6 +4,11 @@
   "description": "Fast, in memory work queue",
   "main": "queue.js",
   "type": "commonjs",
+  "files": [
+    "queue.js",
+    "index.d.ts",
+    "SECURITY.md"
+  ],
   "scripts": {
     "lint": "eslint .",
     "unit": "nyc --lines 100 --branches 100 --functions 100 --check-coverage --reporter=text tape test/test.js test/promise.js",
