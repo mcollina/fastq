@@ -4,6 +4,11 @@
 
 var reusify = require('reusify')
 
+/* istanbul ignore next */
+var defer = typeof process === 'object' && typeof process.nextTick === 'function'
+  ? process.nextTick
+  : queueMicrotask
+
 function fastqueue (context, worker, _concurrency) {
   if (typeof context === 'function') {
     _concurrency = worker
@@ -326,7 +331,7 @@ function queueAsPromised (context, worker, _concurrency) {
 
   function drained () {
     var p = new Promise(function (resolve) {
-      process.nextTick(function () {
+      defer(function () {
         if (queue.idle()) {
           resolve()
         } else {
