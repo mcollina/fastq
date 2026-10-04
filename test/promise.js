@@ -354,3 +354,52 @@ test('abort rejects all pending promises', async function (t) {
     return arg
   }
 })
+
+test('synchronously throwing promise workers release their slot', async function (t) {
+  for (const method of ['push', 'unshift']) {
+    const failure = new Error('worker setup failure')
+    const context = { label: method }
+    const queue = buildQueue(context, worker, 1)
+    const errors = []
+    queue.error((err, value) => errors.push([err, value]))
+
+    function worker (value) {
+      t.equal(this, context, method + ' preserves worker context')
+      if (value === 1) throw failure
+      return Promise.resolve(value)
+    }
+
+    await queue[method](1).then(
+      () => t.fail(method + ' should reject'),
+      err => t.equal(err, failure, method + ' rejects with original error')
+    )
+    t.equal(queue.running(), 0, method + ' releases failed task')
+    t.equal(errors[0][0], failure, method + ' invokes global error handler')
+    t.equal(errors[0][1], 1, method + ' passes failed task to error handler')
+    t.equal(await queue[method](2), 2, method + ' accepts subsequent work')
+    t.ok(queue.idle(), method + ' is idle after success')
+  }
+})
+
+test('queued synchronously throwing promise workers do not stall later tasks', async function (t) {
+  const failure = new Error('queued worker setup failure')
+  let finish
+  const queue = buildQueue(worker, 1)
+  function worker (value) {
+    if (value === 1) return new Promise(resolve => { finish = resolve })
+    if (value === 2) throw failure
+    return Promise.resolve(value)
+  }
+  const first = queue.push(1)
+  const failed = queue.push(2)
+  const last = queue.push(3)
+  finish(1)
+  t.equal(await first, 1)
+  await failed.then(
+    () => t.fail('queued worker should reject'),
+    err => t.equal(err, failure, 'queued rejection retains original error')
+  )
+  t.equal(await last, 3, 'remaining task completes')
+  await queue.drained()
+  t.ok(queue.idle(), 'queue drains after synchronous rejection')
+})
