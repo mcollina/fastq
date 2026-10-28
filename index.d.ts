@@ -5,7 +5,7 @@ declare namespace fastq {
   type worker<C, T = any, R = any> = (this: C, task: T, cb: fastq.done<R>) => void
   type asyncWorker<C, T = any, R = any> = (this: C, task: T) => Promise<R>
   type done<R = any> = (err: Error | null, result?: R) => void
-  type errorHandler<T = any> = (err: Error, task: T) => void
+  type errorHandler<T = any> = (err: Error | null, task: T) => void
 
   interface queue<T = any, R = any> {
     /** Add a task at the end of the queue. `done(err, result)` will be called when the task was processed. */
