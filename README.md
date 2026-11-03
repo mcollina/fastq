@@ -81,6 +81,51 @@ function worker (arg, cb) {
 }
 ```
 
+### Async context and `AsyncLocalStorage`
+
+fastq does not propagate the async context of the caller of `push()` or
+`unshift()` to the worker. A task that has to wait in the queue is
+started from the completion of the task that came before it, so inside
+the worker `AsyncLocalStorage.getStore()` (and any other async-context
+tracking) may return the store of a previous, unrelated task.
+
+Do not rely on ambient async context inside a worker for anything that
+matters, especially authentication or authorization data like the
+current user, tenant, or role. Pass that data explicitly as part of the
+task instead:
+
+```js
+queue.push({ user: req.user, id: req.params.id })
+```
+
+If you need the worker to run in the context of the caller, capture it
+when pushing with
+[`AsyncLocalStorage.snapshot()`](https://nodejs.org/api/async_context.html#static-method-asynclocalstoragesnapshot)
+and run the work inside it:
+
+```js
+'use strict'
+
+const { AsyncLocalStorage } = require('node:async_hooks')
+const queue = require('fastq').promise(worker, 1)
+
+const als = new AsyncLocalStorage()
+
+async function worker ({ run, value }) {
+  return run(async () => {
+    // als.getStore() returns the store of the caller of push()
+    return doWork(value)
+  })
+}
+
+als.run({ user: 'alice' }, () => {
+  queue.push({ run: AsyncLocalStorage.snapshot(), value: 42 })
+})
+```
+
+The same approach works with the callback API: call `run()` within the
+worker and invoke the callback from inside it.
+
 ### Using with TypeScript (callback API)
 
 ```ts
