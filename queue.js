@@ -174,10 +174,11 @@ function fastqueue (context, worker, _concurrency) {
         }
         queueHead = next.next
         next.next = null
-        worker.call(context, next.value, next.worked)
+        // A synchronous worker can finish and drain the queue before returning.
         if (queueTail === null) {
           self.empty()
         }
+        worker.call(context, next.value, next.worked)
       } else {
         _running--
       }

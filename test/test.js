@@ -462,6 +462,88 @@ test('push && empty', function (t) {
   }
 })
 
+var synchronousEmptyMethods = ['push', 'unshift']
+synchronousEmptyMethods.forEach(function (method) {
+  [1, 2, 3].forEach(function (concurrency) {
+    test(method + ' && empty with synchronous workers and concurrency ' + concurrency, function (t) {
+      var events = []
+      var completed = []
+      var completedAtEmpty = []
+      var queue = buildQueue(function (value, callback) {
+        callback(null, value)
+      }, concurrency)
+
+      queue.empty = function () {
+        events.push('empty')
+        completedAtEmpty.push(completed.length)
+      }
+      queue.drain = function () {
+        events.push('drain')
+      }
+      queue.pause()
+      queue[method](1, done)
+      queue[method](2, done)
+      queue[method](3, done)
+      queue.resume()
+
+      t.deepEqual(events, ['empty', 'drain'], 'empty fires once before drain')
+      t.deepEqual(completedAtEmpty, [2], 'the last assigned task has not completed yet')
+      t.deepEqual(completed, method === 'push' ? [1, 2, 3] : [3, 2, 1], 'all tasks complete in order')
+      t.ok(queue.idle(), 'queue is idle')
+      t.end()
+
+      function done (err, value) {
+        t.error(err, 'task completes without error')
+        completed.push(value)
+      }
+    })
+  })
+})
+
+test('empty can enqueue another task with a synchronous worker', function (t) {
+  var completed = []
+  var emptyCount = 0
+  var drainCount = 0
+  var queue = buildQueue(function (value, callback) {
+    completed.push(value)
+    callback()
+  }, 1)
+  queue.empty = function () {
+    if (++emptyCount === 1) queue.push(2)
+  }
+  queue.drain = function () {
+    drainCount++
+  }
+  queue.pause()
+  queue.push(1)
+  queue.resume()
+
+  t.deepEqual(completed, [1, 2], 'both assigned tasks run')
+  t.equal(emptyCount, 2, 'each queued batch emits empty once')
+  t.equal(drainCount, 1, 'drain waits for the enqueued task')
+  t.ok(queue.idle(), 'queue is idle')
+  t.end()
+})
+
+test('pausing in empty does not stop the assigned task', function (t) {
+  var completed = []
+  var queue = buildQueue(function (value, callback) {
+    completed.push(value)
+    callback()
+  }, 1)
+  queue.empty = function () {
+    queue.pause()
+  }
+  queue.pause()
+  queue.push(1)
+  queue.resume()
+
+  t.deepEqual(completed, [1], 'the assigned task still runs')
+  t.ok(queue.paused, 'the queue remains paused')
+  t.ok(queue.idle(), 'no task remains active or queued')
+  t.end()
+})
+
 test('kill', function (t) {
   t.plan(5)
 
