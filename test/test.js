@@ -186,6 +186,76 @@ test('pause && resume', function (t) {
   }
 })
 
+test('pause synchronously during resume', function (t) {
+  t.plan(14)
+
+  var processed = []
+  var queue = buildQueue(function (value, cb) {
+    processed.push(value)
+    queue.pause()
+    cb(null, value)
+  }, 1)
+
+  queue.pause()
+  queue.push(1, function (err, result) {
+    t.error(err, 'first task has no error')
+    t.equal(result, 1, 'first result matches')
+  })
+  queue.push(2, function (err, result) {
+    t.error(err, 'second task has no error')
+    t.equal(result, 2, 'second result matches')
+  })
+
+  queue.resume()
+  t.ok(queue.paused, 'worker pause is preserved')
+  t.deepEqual(processed, [1], 'only the first task runs')
+  t.deepEqual(queue.getQueue(), [2], 'second task stays queued')
+  t.equal(queue.running(), 0, 'no task remains running')
+  t.equal(queue.length(), 1, 'one task remains queued')
+  t.notOk(queue.idle(), 'queue is not idle')
+
+  queue.resume()
+  t.deepEqual(processed, [1, 2], 'next resume processes remaining task')
+  t.ok(queue.paused, 'second worker pause is preserved')
+  t.equal(queue.running(), 0, 'running count is restored')
+  t.ok(queue.idle(), 'all work has completed')
+})
+
+test('pause synchronously when increasing concurrency', function (t) {
+  t.plan(10)
+
+  var finishFirst
+  var processed = []
+  var queue = buildQueue(function (value, cb) {
+    processed.push(value)
+    if (value === 1) {
+      finishFirst = cb
+    } else {
+      queue.pause()
+      cb(null)
+    }
+  }, 1)
+
+  queue.push(1)
+  queue.push(2)
+  queue.push(3)
+  queue.concurrency = 2
+
+  t.equal(queue.concurrency, 2, 'new concurrency is retained')
+  t.ok(queue.paused, 'worker pause is preserved')
+  t.deepEqual(processed, [1, 2], 'remaining task has not started')
+  t.deepEqual(queue.getQueue(), [3], 'remaining task stays queued')
+  t.equal(queue.running(), 1, 'first task is still active')
+
+  finishFirst(null)
+  t.equal(queue.running(), 0, 'first task can finish while paused')
+  t.deepEqual(queue.getQueue(), [3], 'completion does not dispatch while paused')
+  queue.resume()
+  t.deepEqual(processed, [1, 2, 3], 'resume processes remaining task')
+  t.ok(queue.paused, 'last worker pause is preserved')
+  t.ok(queue.idle(), 'all work has completed')
+})
+
 test('pause in flight && resume', function (t) {
   t.plan(16)
 
