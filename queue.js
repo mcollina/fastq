@@ -43,7 +43,7 @@ function fastqueue (context, worker, _concurrency) {
       _concurrency = value
 
       if (self.paused) return
-      for (; queueHead && _running < _concurrency;) {
+      for (; !self.paused && queueHead && _running < _concurrency;) {
         _running++
         release()
       }
@@ -104,7 +104,7 @@ function fastqueue (context, worker, _concurrency) {
       release()
       return
     }
-    for (; queueHead && _running < _concurrency;) {
+    for (; !self.paused && queueHead && _running < _concurrency;) {
       _running++
       release()
     }
