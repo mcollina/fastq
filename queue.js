@@ -274,10 +274,16 @@ function queueAsPromised (context, worker, _concurrency) {
   }
 
   function asyncWrapper (arg, cb) {
-    worker.call(this, arg)
-      .then(function (res) {
-        cb(null, res)
-      }, cb)
+    var result
+    try {
+      result = worker.call(this, arg)
+    } catch (err) {
+      cb(err)
+      return
+    }
+    result.then(function (res) {
+      cb(null, res)
+    }, cb)
   }
 
   var queue = fastqueue(context, asyncWrapper, _concurrency)
