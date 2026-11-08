@@ -252,7 +252,7 @@ function Task () {
 
   var self = this
 
-  this.worked = function worked (err, result) {
+  this.worked = function worked (err, result, failed) {
     var callback = self.callback
     var errorHandler = self.errorHandler
     var val = self.value
@@ -261,7 +261,7 @@ function Task () {
     if (self.errorHandler) {
       errorHandler(err, val)
     }
-    callback.call(self.context, err, result)
+    callback.call(self.context, err, result, failed)
     self.release(self)
   }
 }
@@ -277,7 +277,10 @@ function queueAsPromised (context, worker, _concurrency) {
     worker.call(this, arg)
       .then(function (res) {
         cb(null, res)
-      }, cb)
+      }, function (err) {
+        // Promise rejection reasons can be falsy.
+        cb(err, undefined, true)
+      })
   }
 
   var queue = fastqueue(context, asyncWrapper, _concurrency)
@@ -293,8 +296,8 @@ function queueAsPromised (context, worker, _concurrency) {
 
   function push (value) {
     var p = new Promise(function (resolve, reject) {
-      pushCb(value, function (err, result) {
-        if (err) {
+      pushCb(value, function (err, result, failed) {
+        if (err || failed) {
           reject(err)
           return
         }
@@ -312,8 +315,8 @@ function queueAsPromised (context, worker, _concurrency) {
 
   function unshift (value) {
     var p = new Promise(function (resolve, reject) {
-      unshiftCb(value, function (err, result) {
-        if (err) {
+      unshiftCb(value, function (err, result, failed) {
+        if (err || failed) {
           reject(err)
           return
         }
