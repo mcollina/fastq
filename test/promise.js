@@ -217,6 +217,31 @@ test('unshift with worker throwing error', async function (t) {
   }
 })
 
+for (const method of ['push', 'unshift']) {
+  test(method + ' preserves falsy promise rejection reasons', async function (t) {
+    const reasons = [undefined, null, false, 0, '', NaN]
+    const queue = buildQueue(function (task) {
+      return Promise.reject(task.reason)
+    }, 1)
+
+    queue.error(function (err, task) {
+      t.ok(Object.is(err, task.reason), 'global handler receives the original reason')
+    })
+
+    await Promise.all(reasons.map(function (reason) {
+      return queue[method]({ reason }).then(function () {
+        t.fail('rejected worker must reject the task promise')
+      }, function (err) {
+        t.ok(Object.is(err, reason), 'task promise rejects with the original reason')
+      })
+    }))
+
+    t.equal(queue.running(), 0, 'all worker slots are released')
+    t.equal(queue.length(), 0, 'all queued tasks are processed')
+    t.ok(queue.idle(), 'queue is idle after rejected tasks')
+  })
+}
+
 test('no unhandledRejection (push)', async function (t) {
   function handleRejection () {
     t.fail('unhandledRejection')
