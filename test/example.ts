@@ -81,3 +81,27 @@ async function run () {
 }
 
 run()
+
+// Global error handlers also receive successful completions.
+
+const errorHandler: fastq.errorHandler<number> = (err, task) => {
+  if (err) console.log(err.message)
+  console.log(task.toFixed())
+}
+
+errorHandler(null, 7)
+errorHandler(new Error('failed'), 7)
+
+genericsQueue.error(errorHandler)
+
+const genericsPromiseQueue = queueAsPromised(async (task: number) => task.toString(), 1)
+genericsPromiseQueue.error(errorHandler)
+
+// @ts-expect-error Global handlers must accept null on successful completion.
+genericsQueue.error((err: Error, task: number) => console.log(err.message, task))
+// @ts-expect-error Promise queues have the same nullable error contract.
+genericsPromiseQueue.error((err: Error, task: number) => console.log(err.message, task))
+// @ts-expect-error The handler task type must match the queue task type.
+genericsQueue.error((err: Error | null, task: string) => console.log(err, task))
+// @ts-expect-error Promise queues preserve the handler task type too.
+genericsPromiseQueue.error((err: Error | null, task: string) => console.log(err, task))
